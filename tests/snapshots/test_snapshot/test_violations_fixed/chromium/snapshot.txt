@@ -1,0 +1,4 @@
+html-has-lang (serious) : 1
+landmark-one-main (moderate) : 1
+region (moderate) : 1
+color-contrast (moderate) : 1

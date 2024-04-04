@@ -1,0 +1,3 @@
+html-has-lang (serious) : 0
+landmark-one-main (moderate) : 1
+region (moderate) : 1

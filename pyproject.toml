@@ -1,0 +1,66 @@
+[project]
+name = "pytest-axe-playwright-snapshot"
+description = "A pytest plugin that runs Axe-core on Playwright pages and takes snapshots of the results."
+version = "0.0.6"
+authors = [{name = "Pamela Fox"}]
+requires-python = ">=3.8"
+readme = "README.md"
+license = {file = "LICENSE"}
+dependencies = [
+    "pytest",
+    "pytest-cov",
+    "playwright",
+    "axe-playwright-python",
+    "pytest-snapshot-with-message-generator"
+    ]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Framework :: Pytest"
+    ]
+
+[project.urls]
+Home = "https://github.com/pamelafox/pytest-axe-playwright-snapshot"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-playwright",
+    "pre-commit",
+    "ruff",
+    "black",
+    "flit",
+]
+
+[project.entry-points.pytest11]
+axe_playwright_snapshot = "pytest_axe_playwright_snapshot"
+
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "pytest_axe_playwright_snapshot"
+
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+select = ["E", "F", "I", "UP"]
+ignore = ["D203", "E501"]
+show-source = true
+
+[tool.black]
+line-length = 120
+target-version = ["py38"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --cov"
+
+[tool.coverage.report]
+show_missing = true
