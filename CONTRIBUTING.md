@@ -6,7 +6,6 @@ Install the project dependencies:
 
 ```sh
 python3 -m pip install -e '.[dev]'
-python3 -m playwright install --with-deps
 pre-commit install
 ```
 

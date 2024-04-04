@@ -1,39 +1,69 @@
-# pytest-axe-playwright-snapshot
+# llm-messages-token-helper
 
-A pytest plugin that runs Axe-core on Playwright pages and takes snapshots of the results.
+A helper library for estimating tokens used by messages and building messages lists that fit within the token limits of a model.
+Currently designed to work with the OpenAI GPT models (including GPT-4 turbo with vision).
+Uses the tiktoken library for tokenizing text and the Pillow library for image-related calculations.
 
 ## Installation
 
-1. Install the plugin:
+Install the package:
 
-    ```sh
-    python3 -m pip install pytest-axe-playwright-snapshot
-    ```
-
-2. Install Playwright browsers:
-
-    ```sh
-    python3 -m playwright install --with-deps
-    ```
+```sh
+python3 -m pip install openai-messages-token-helper
+```
 
 ## Usage
 
-In your tests, use the `page` fixture from pytest-playwright along with our plugin's`axe_pytest_snapshot` fixture. Once you've navigated to a page, call `axe_pytest_snapshot` with the `page` fixture as an argument:
+Build a messages list that fits within the max tokens for a model:
 
 ```python
-from playwright.sync_api import Page
+from llm_messages_token_helper import build_messages, count_tokens_for_message
 
-def test_violations(page: Page, axe_pytest_snapshot):
-    page.goto("https://www.example.com")
-    axe_pytest_snapshot(page)
+messages = build_messages(
+    model="gpt-35-turbo",
+    system_prompt="You are a bot.",
+    new_user_message="That wasn't a good poem.",
+    past_messages=[
+        {
+            "role": "user",
+            "content": "Write me a poem",
+        },
+        {
+            "role": "assistant",
+            "content": "Tuna tuna I love tuna",
+        },
+    ],
+    few_shots=[
+        {
+            "role": "user",
+            "content": "Write me a poem",
+        },
+        {
+            "role": "assistant",
+            "content": "Tuna tuna is the best",
+        },
+    ]
+)
 ```
 
-When you run a test for the first time, you must tell it explicitly to save a snapshot:
+Count the number of tokens in a message:
 
-```sh
-pytest --snapshot-update
+```python
+from llm_messages_token_helper import count_tokens
+
+message = {
+    "role": "user",
+    "content": "Hello, how are you?",
+}
+model = "gpt-4"
+num_tokens = count_tokens_for_message(model, message)
 ```
 
-The plugin will take a snapshot of the page and save it to a file in the `snapshots` directory. The snapshot directory will be named after the test function, and the file will be named 'violations.txt'.
+Count the number of tokens for an image sent to GPT-4-vision:
 
-On subsequent runs, the plugin will compare the latest snapshot against the snapshot and report any difference in the violations.
+```python
+from llm_messages_token_helper import count_tokens_for_image
+
+image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEA..."
+num_tokens = count_tokens_for_image(image)
+```
