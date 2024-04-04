@@ -20,10 +20,17 @@ MODELS_2_TOKEN_LIMITS = {
 AOAI_2_OAI = {"gpt-35-turbo": "gpt-3.5-turbo", "gpt-35-turbo-16k": "gpt-3.5-turbo-16k", "gpt-4v": "gpt-4-turbo-vision"}
 
 
-def get_token_limit(model_id: str) -> int:
-    if model_id not in MODELS_2_TOKEN_LIMITS:
-        raise ValueError(f"Expected model gpt-35-turbo and above. Received: {model_id}")
-    return MODELS_2_TOKEN_LIMITS[model_id]
+def get_token_limit(model: str) -> int:
+    """
+    Get the token limit for a given GPT model name (OpenAI.com or Azure OpenAI supported).
+    Args:
+        model (str): The name of the model to get the token limit for.
+    Returns:
+        int: The token limit for the model.
+    """
+    if model not in MODELS_2_TOKEN_LIMITS:
+        raise ValueError(f"Called with unknown model name: {model}")
+    return MODELS_2_TOKEN_LIMITS[model]
 
 
 def count_tokens_for_message(model: str, message: Mapping[str, object]) -> int:

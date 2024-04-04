@@ -1,9 +1,19 @@
 import pytest
-from llm_messages_token_helper import count_tokens_for_message
+from llm_messages_token_helper import count_tokens_for_message, get_token_limit
 
-# def test_get_token_limit_error():
-#    with pytest.raises(ValueError, match="Expected model gpt-35-turbo and above"):
-#        get_token_limit("gpt-3")
+
+def test_get_token_limit():
+    assert get_token_limit("gpt-35-turbo") == 4000
+    assert get_token_limit("gpt-3.5-turbo") == 4000
+    assert get_token_limit("gpt-35-turbo-16k") == 16000
+    assert get_token_limit("gpt-3.5-turbo-16k") == 16000
+    assert get_token_limit("gpt-4") == 8100
+    assert get_token_limit("gpt-4-32k") == 32000
+
+
+def test_get_token_limit_error():
+    with pytest.raises(ValueError, match="Called with unknown model name: gpt-3"):
+        get_token_limit("gpt-3")
 
 
 # parameterize the model and the expected number of tokens

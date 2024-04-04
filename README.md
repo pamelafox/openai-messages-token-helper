@@ -9,7 +9,7 @@ Uses the tiktoken library for tokenizing text and the Pillow library for image-r
 Install the package:
 
 ```sh
-python3 -m pip install openai-messages-token-helper
+python3 -m pip install llm-messages-token-helper
 ```
 
 ## Usage
@@ -66,4 +66,13 @@ from llm_messages_token_helper import count_tokens_for_image
 
 image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEA..."
 num_tokens = count_tokens_for_image(image)
+```
+
+Get the max tokens for a model:
+
+```python
+from llm_messages_token_helper import get_token_limit
+
+model = "gpt-4"
+max_tokens = get_token_limit(model)
 ```
