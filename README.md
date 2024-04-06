@@ -14,10 +14,36 @@ python3 -m pip install llm-messages-token-helper
 
 ## Usage
 
-Build a messages list that fits within the max tokens for a model:
+The library provides the following functions:
+
+* [`build_messages`](#build_messages)
+* [`count_tokens_for_message`](#count_tokens_for_message)
+* [`count_tokens_for_image`](#count_tokens_for_image)
+* [`get_token_limit`](#get_token_limit)
+
+### `build_messages`
+
+Build a list of messages for a chat conversation, given the system prompt, new user message,
+and past messages. The function will truncate the history of past messages if necessary to
+stay within the token limit.
+
+Arguments:
+
+* `model` (`str`): The model name to use for token calculation, like gpt-3.5-turbo.
+* `system_prompt` (`str`): The initial system prompt message.
+* `new_user_message` (`str | List[openai.types.chat.ChatCompletionContentPartParam]`): The new user message to append.
+* `past_messages` (`list[dict]`): The list of past messages in the conversation.
+* `few_shots` (`list[dict]`): A few-shot list of messages to insert after the system prompt.
+* `max_tokens` (`int`): The maximum number of tokens allowed for the conversation.
+
+Returns:
+
+* `list[openai.types.chat.ChatCompletionMessageParam]`
+
+Example:
 
 ```python
-from llm_messages_token_helper import build_messages, count_tokens_for_message
+from llm_messages_token_helper import build_messages
 
 messages = build_messages(
     model="gpt-35-turbo",
@@ -46,10 +72,22 @@ messages = build_messages(
 )
 ```
 
-Count the number of tokens in a message:
+### `count_tokens_for_message`
+
+Counts the number of tokens in a message.
+
+Arguments:
+
+* `model` (`str`): The model name to use for token calculation, like gpt-3.5-turbo.
+
+Returns:
+
+* `int`: The number of tokens in the message.
+
+Example:
 
 ```python
-from llm_messages_token_helper import count_tokens
+from llm_messages_token_helper import count_tokens_for_message
 
 message = {
     "role": "user",
@@ -58,6 +96,22 @@ message = {
 model = "gpt-4"
 num_tokens = count_tokens_for_message(model, message)
 ```
+
+### `count_tokens_for_image`
+
+Count the number of tokens for an image sent to GPT-4-vision, in base64 format.
+
+Arguments:
+
+* `image` (`str`): The base64-encoded image.
+
+Returns:
+
+* `int`: The number of tokens used up for the image.
+
+Example:
+
+```python
 
 Count the number of tokens for an image sent to GPT-4-vision:
 
@@ -68,7 +122,19 @@ image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEA..."
 num_tokens = count_tokens_for_image(image)
 ```
 
-Get the max tokens for a model:
+### `get_token_limit`
+
+Get the token limit for a given GPT model name (OpenAI.com or Azure OpenAI supported).
+
+Arguments:
+
+* `model` (`str`): The model name to use for token calculation, like gpt-3.5-turbo (OpenAI.com) or gpt-35-turbo (Azure).
+
+Returns:
+
+* `int`: The token limit for the model.
+
+Example:
 
 ```python
 from llm_messages_token_helper import get_token_limit
