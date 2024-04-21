@@ -1,5 +1,5 @@
 import pytest
-from llm_messages_token_helper import count_tokens_for_message, get_token_limit
+from openai_messages_token_helper import count_tokens_for_message, get_token_limit
 
 from .messages import system_message, system_message_with_name, text_and_image_message, user_message
 

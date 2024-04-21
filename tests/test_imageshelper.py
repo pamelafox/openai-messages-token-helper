@@ -1,7 +1,7 @@
 import base64
 
 import pytest
-from llm_messages_token_helper import count_tokens_for_image
+from openai_messages_token_helper import count_tokens_for_image
 
 
 @pytest.fixture

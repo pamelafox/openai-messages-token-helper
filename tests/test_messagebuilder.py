@@ -1,4 +1,4 @@
-from llm_messages_token_helper import build_messages, count_tokens_for_message
+from openai_messages_token_helper import build_messages, count_tokens_for_message
 
 from .messages import system_message_short, system_message_unicode, user_message, user_message_unicode
 
