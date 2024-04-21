@@ -1,11 +1,25 @@
-text_message = {
+user_message = {
     "message": {
-        # 1 token : 1 token
         "role": "user",
-        # 1 token : 5 tokens
         "content": "Hello, how are you?",
     },
     "count": 13,
+}
+
+user_message_unicode = {
+    "message": {
+        "role": "user",
+        "content": "á",
+    },
+    "count": 8,
+}
+
+system_message_short = {
+    "message": {
+        "role": "system",
+        "content": "You are a bot.",
+    },
+    "count": 12,
 }
 
 system_message = {
@@ -14,6 +28,14 @@ system_message = {
         "content": "You are a helpful, pattern-following assistant that translates corporate jargon into plain English.",
     },
     "count": 25,
+}
+
+system_message_unicode = {
+    "message": {
+        "role": "system",
+        "content": "á",
+    },
+    "count": 8,
 }
 
 system_message_with_name = {
@@ -27,15 +49,13 @@ system_message_with_name = {
 
 text_and_image_message = {
     "message": {
-        # 1 token : 1 token
         "role": "user",
-        # 1 token : 262 tokens
         "content": [
-            {"type": "text", "text": "Describe this picture:"},  # 1 token  # 4 tokens
+            {"type": "text", "text": "Describe this picture:"},
             {
-                "type": "image_url",  # 2 tokens
+                "type": "image_url",
                 "image_url": {
-                    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==",  # 255 tokens
+                    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==",
                     "detail": "auto",
                 },
             },

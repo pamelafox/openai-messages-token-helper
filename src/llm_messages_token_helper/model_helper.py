@@ -59,7 +59,7 @@ def count_tokens_for_message(model: str, message: Mapping[str, object]) -> int:
         if isinstance(value, list):
             # For GPT-4-vision support, based on https://github.com/openai/openai-cookbook/pull/881/files
             for item in value:
-                num_tokens += len(encoding.encode(item["type"]))
+                # Note: item[type] does not seem to be counted in the token count
                 if item["type"] == "text":
                     num_tokens += len(encoding.encode(item["text"]))
                 elif item["type"] == "image_url":

@@ -3,7 +3,15 @@ import os
 import azure.identity
 import openai
 from dotenv import load_dotenv
-from messages import system_message, system_message_with_name, text_and_image_message, text_message
+from messages import (
+    system_message,
+    system_message_short,
+    system_message_unicode,
+    system_message_with_name,
+    text_and_image_message,
+    user_message,
+    user_message_unicode,
+)
 
 # Setup the OpenAI client to use either Azure OpenAI or OpenAI API
 load_dotenv()
@@ -24,7 +32,15 @@ else:
     MODEL_NAME = os.getenv("OPENAI_MODEL")
 
 # Test the token count for each message
-for message_count_pair in [text_message, system_message, system_message_with_name, text_and_image_message]:
+for message_count_pair in [
+    user_message,
+    user_message_unicode,
+    system_message,
+    system_message_short,
+    system_message_unicode,
+    system_message_with_name,
+    text_and_image_message,
+]:
     response = client.chat.completions.create(
         model=MODEL_NAME,
         temperature=0.7,
