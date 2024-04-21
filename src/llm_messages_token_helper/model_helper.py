@@ -35,7 +35,9 @@ def get_token_limit(model: str) -> int:
 
 def count_tokens_for_message(model: str, message: Mapping[str, object]) -> int:
     """
-    Calculate the number of tokens required to encode a message.
+    Calculate the number of tokens required to encode a message. Based off cookbook:
+    https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+
     Args:
         model (str): The name of the model to use for encoding.
         message (Mapping): The message to encode, in a dictionary-like object.
@@ -45,12 +47,15 @@ def count_tokens_for_message(model: str, message: Mapping[str, object]) -> int:
     >> model = 'gpt-3.5-turbo'
     >> message = {'role': 'user', 'content': 'Hello, how are you?'}
     >> count_tokens_for_message(model, message)
-    11
+    13
     """
 
     encoding = tiktoken.encoding_for_model(get_oai_chatmodel_tiktok(model))
-    num_tokens = 2  # For "role" and "content" keys
-    for value in message.values():
+    # Assumes we're using a recent model
+    tokens_per_message = 3
+
+    num_tokens = tokens_per_message
+    for key, value in message.items():
         if isinstance(value, list):
             # For GPT-4-vision support, based on https://github.com/openai/openai-cookbook/pull/881/files
             for item in value:
@@ -63,6 +68,9 @@ def count_tokens_for_message(model: str, message: Mapping[str, object]) -> int:
             num_tokens += len(encoding.encode(value))
         else:
             raise ValueError(f"Could not encode unsupported message value type: {type(value)}")
+        if key == "name":
+            num_tokens += 1
+    num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
     return num_tokens
 
 
