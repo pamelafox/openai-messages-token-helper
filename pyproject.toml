@@ -1,7 +1,7 @@
 [project]
 name = "llm-messages-token-helper"
 description = "A helper library for estimating tokens used by messages."
-version = "0.0.2"
+version = "0.0.3"
 authors = [{name = "Pamela Fox"}]
 requires-python = ">=3.9"
 readme = "README.md"
@@ -33,6 +33,8 @@ dev = [
     "ruff",
     "black",
     "flit",
+    "azure-identity",
+    "python-dotenv"
 ]
 
 [build-system]
@@ -42,9 +44,11 @@ build-backend = "flit_core.buildapi"
 [tool.ruff]
 line-length = 120
 target-version = "py39"
+output-format = "full"
+
+[tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
 ignore = ["D203", "E501"]
-show-source = true
 
 [tool.black]
 line-length = 120

@@ -1,6 +1,8 @@
 import pytest
 from llm_messages_token_helper import count_tokens_for_message, get_token_limit
 
+from .messages import system_message, system_message_with_name, text_and_image_message, user_message
+
 
 def test_get_token_limit():
     assert get_token_limit("gpt-35-turbo") == 4000
@@ -29,52 +31,26 @@ def test_get_token_limit_error():
         "gpt-4v",
     ],
 )
-def test_count_tokens_for_message(model: str):
-    message = {
-        # 1 token : 1 token
-        "role": "user",
-        # 1 token : 5 tokens
-        "content": "Hello, how are you?",
-    }
-    assert count_tokens_for_message(model, message) == 9
-
-
-def test_count_tokens_for_message_gpt4():
-    message = {
-        # 1 token : 1 token
-        "role": "user",
-        # 1 token : 5 tokens
-        "content": "Hello, how are you?",
-    }
-    model = "gpt-4"
-    assert count_tokens_for_message(model, message) == 9
+@pytest.mark.parametrize(
+    "message",
+    [
+        user_message,
+        system_message,
+        system_message_with_name,
+    ],
+)
+def test_count_tokens_for_message(model: str, message: dict):
+    assert count_tokens_for_message(model, message["message"]) == message["count"]
 
 
 def test_count_tokens_for_message_list():
-    message = {
-        # 1 token : 1 token
-        "role": "user",
-        # 1 token : 262 tokens
-        "content": [
-            {"type": "text", "text": "Describe this picture:"},  # 1 token  # 4 tokens
-            {
-                "type": "image_url",  # 2 tokens
-                "image_url": {
-                    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==",  # 255 tokens
-                    "detail": "auto",
-                },
-            },
-        ],
-    }
     model = "gpt-4"
-    assert count_tokens_for_message(model, message) == 265
+    assert count_tokens_for_message(model, text_and_image_message["message"]) == text_and_image_message["count"]
 
 
 def test_count_tokens_for_message_error():
     message = {
-        # 1 token : 1 token
         "role": "user",
-        # 1 token : 5 tokens
         "content": {"key": "value"},
     }
     model = "gpt-35-turbo"
@@ -85,7 +61,7 @@ def test_count_tokens_for_message_error():
 def test_get_oai_chatmodel_tiktok_error():
     message = {
         "role": "user",
-        "content": {"key": "value"},
+        "content": "hello",
     }
     with pytest.raises(ValueError, match="Expected valid OpenAI GPT model name"):
         count_tokens_for_message("", message)
