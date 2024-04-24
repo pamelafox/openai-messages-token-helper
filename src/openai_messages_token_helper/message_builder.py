@@ -1,6 +1,5 @@
 import logging
 import unicodedata
-from collections.abc import Mapping
 from typing import Optional, Union
 
 from openai.types.chat import (
@@ -52,9 +51,6 @@ class MessageBuilder:
             raise ValueError(f"Invalid role: {role}")
         self.messages.insert(index, message)
 
-    def count_tokens_for_message(self, message: Mapping[str, object]):
-        return count_tokens_for_message(self.model, message)
-
     def normalize_content(self, content: Union[str, list[ChatCompletionContentPartParam]]):
         if isinstance(content, str):
             return unicodedata.normalize("NFC", content)
@@ -72,6 +68,7 @@ def build_messages(
     past_messages: list[dict[str, str]] = [],  # *not* including system prompt
     few_shots=[],  # will always be inserted after system prompt
     max_tokens: Optional[int] = None,
+    fallback_to_default: bool = False,
 ) -> list[ChatCompletionMessageParam]:
     """
     Build a list of messages for a chat conversation, given the system prompt, new user message,
@@ -84,10 +81,11 @@ def build_messages(
         past_messages (list[dict]): The list of past messages in the conversation.
         few_shots (list[dict]): A few-shot list of messages to insert after the system prompt.
         max_tokens (int): The maximum number of tokens allowed for the conversation.
+        fallback_to_default (bool): Whether to fallback to default model if the model is not found.
     """
     message_builder = MessageBuilder(system_prompt, model)
     if max_tokens is None:
-        max_tokens = get_token_limit(model)
+        max_tokens = get_token_limit(model, default_to_minimum=fallback_to_default)
 
     for shot in reversed(few_shots):
         message_builder.insert_message(shot.get("role"), shot.get("content"))
@@ -99,11 +97,11 @@ def build_messages(
 
     total_token_count = 0
     for existing_message in message_builder.messages:
-        total_token_count += message_builder.count_tokens_for_message(existing_message)
+        total_token_count += count_tokens_for_message(model, existing_message, default_to_cl100k=fallback_to_default)
 
-    newest_to_oldest = list(reversed(past_messages[:-1]))
+    newest_to_oldest = list(reversed(past_messages))
     for message in newest_to_oldest:
-        potential_message_count = message_builder.count_tokens_for_message(message)
+        potential_message_count = count_tokens_for_message(model, message, default_to_cl100k=fallback_to_default)
         if (total_token_count + potential_message_count) > max_tokens:
             logging.info("Reached max tokens of %d, history will be truncated", max_tokens)
             break
