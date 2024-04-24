@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
 
 import tiktoken
@@ -19,21 +20,29 @@ MODELS_2_TOKEN_LIMITS = {
 
 AOAI_2_OAI = {"gpt-35-turbo": "gpt-3.5-turbo", "gpt-35-turbo-16k": "gpt-3.5-turbo-16k", "gpt-4v": "gpt-4-turbo-vision"}
 
+logger = logging.getLogger("openai_messages_token_helper")
 
-def get_token_limit(model: str) -> int:
+
+def get_token_limit(model: str, default_to_minimum=False) -> int:
     """
     Get the token limit for a given GPT model name (OpenAI.com or Azure OpenAI supported).
     Args:
         model (str): The name of the model to get the token limit for.
+        default_to_minimum (bool): Whether to default to the minimum token limit if the model is not found.
     Returns:
         int: The token limit for the model.
     """
     if model not in MODELS_2_TOKEN_LIMITS:
-        raise ValueError(f"Called with unknown model name: {model}")
+        if default_to_minimum:
+            min_token_limit = min(MODELS_2_TOKEN_LIMITS.values())
+            logger.warning("Model %s not found, defaulting to minimum token limit %d", model, min_token_limit)
+            return min_token_limit
+        else:
+            raise ValueError(f"Called with unknown model name: {model}")
     return MODELS_2_TOKEN_LIMITS[model]
 
 
-def count_tokens_for_message(model: str, message: Mapping[str, object]) -> int:
+def count_tokens_for_message(model: str, message: Mapping[str, object], default_to_cl100k=False) -> int:
     """
     Calculate the number of tokens required to encode a message. Based off cookbook:
     https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
@@ -41,6 +50,7 @@ def count_tokens_for_message(model: str, message: Mapping[str, object]) -> int:
     Args:
         model (str): The name of the model to use for encoding.
         message (Mapping): The message to encode, in a dictionary-like object.
+        default_to_cl100k (bool): Whether to default to the CL100k encoding if the model is not found.
     Returns:
         int: The total number of tokens required to encode the message.
 
@@ -49,8 +59,22 @@ def count_tokens_for_message(model: str, message: Mapping[str, object]) -> int:
     >> count_tokens_for_message(model, message)
     13
     """
+    if (
+        model == ""
+        or model is None
+        or (model not in AOAI_2_OAI and model not in MODELS_2_TOKEN_LIMITS and not default_to_cl100k)
+    ):
+        raise ValueError("Expected valid OpenAI GPT model name")
+    model = AOAI_2_OAI.get(model, model)
+    try:
+        encoding = tiktoken.encoding_for_model(model)
+    except KeyError:
+        if default_to_cl100k:
+            logger.warning("Model %s not found, defaulting to CL100k encoding", model)
+            encoding = tiktoken.get_encoding("cl100k_base")
+        else:
+            raise
 
-    encoding = tiktoken.encoding_for_model(get_oai_chatmodel_tiktok(model))
     # Assumes we're using a recent model
     tokens_per_message = 3
 
@@ -72,12 +96,3 @@ def count_tokens_for_message(model: str, message: Mapping[str, object]) -> int:
             num_tokens += 1
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
     return num_tokens
-
-
-def get_oai_chatmodel_tiktok(aoaimodel: str) -> str:
-    message = "Expected valid OpenAI GPT model name"
-    if aoaimodel == "" or aoaimodel is None:
-        raise ValueError(message)
-    if aoaimodel not in AOAI_2_OAI and aoaimodel not in MODELS_2_TOKEN_LIMITS:
-        raise ValueError(message)
-    return AOAI_2_OAI.get(aoaimodel, aoaimodel)
