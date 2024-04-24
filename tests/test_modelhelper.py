@@ -18,6 +18,12 @@ def test_get_token_limit_error():
         get_token_limit("gpt-3")
 
 
+def test_get_token_limit_default(caplog):
+    with caplog.at_level("WARNING"):
+        assert get_token_limit("gpt-3", default_to_minimum=True) == 4000
+        assert "Model gpt-3 not found, defaulting to minimum token limit 4000" in caplog.text
+
+
 # parameterize the model and the expected number of tokens
 @pytest.mark.parametrize(
     "model",
@@ -58,14 +64,17 @@ def test_count_tokens_for_message_error():
         count_tokens_for_message(model, message)
 
 
-def test_get_oai_chatmodel_tiktok_error():
-    message = {
-        "role": "user",
-        "content": "hello",
-    }
+def test_count_tokens_for_message_model_error():
     with pytest.raises(ValueError, match="Expected valid OpenAI GPT model name"):
-        count_tokens_for_message("", message)
+        count_tokens_for_message("", user_message["message"])
     with pytest.raises(ValueError, match="Expected valid OpenAI GPT model name"):
-        count_tokens_for_message(None, message)
+        count_tokens_for_message(None, user_message["message"])
     with pytest.raises(ValueError, match="Expected valid OpenAI GPT model name"):
-        count_tokens_for_message("gpt44", message)
+        count_tokens_for_message("gpt44", user_message["message"])
+
+
+def test_count_tokens_for_message_model_default(caplog):
+    model = "phi-3"
+    with caplog.at_level("WARNING"):
+        assert count_tokens_for_message(model, user_message["message"], default_to_cl100k=True) == user_message["count"]
+        assert "Model phi-3 not found, defaulting to CL100k encoding" in caplog.text

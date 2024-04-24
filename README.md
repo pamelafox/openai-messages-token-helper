@@ -79,6 +79,8 @@ Counts the number of tokens in a message.
 Arguments:
 
 * `model` (`str`): The model name to use for token calculation, like gpt-3.5-turbo.
+* `message` (`dict`): The message to count tokens for.
+* `default_to_cl100k` (`bool`): Whether to default to the CL100k token limit if the model is not found.
 
 Returns:
 
@@ -129,6 +131,7 @@ Get the token limit for a given GPT model name (OpenAI.com or Azure OpenAI suppo
 Arguments:
 
 * `model` (`str`): The model name to use for token calculation, like gpt-3.5-turbo (OpenAI.com) or gpt-35-turbo (Azure).
+* `default_to_minimum` (`bool`): Whether to default to the minimum token limit if the model is not found.
 
 Returns:
 
