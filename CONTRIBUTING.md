@@ -19,6 +19,8 @@ python3 -m pytest
 
 Publish to PyPi:
 
-```sh
+```shell
+export FLIT_USERNAME=__token__
+export FLIT_PASSWORD=<your-pypi-token>
 flit publish
 ```
