@@ -35,6 +35,7 @@ Arguments:
 * `past_messages` (`list[dict]`): The list of past messages in the conversation.
 * `few_shots` (`list[dict]`): A few-shot list of messages to insert after the system prompt.
 * `max_tokens` (`int`): The maximum number of tokens allowed for the conversation.
+* `fallback_to_default` (`bool`): Whether to fallback to default model/token limits if model is not found. Defaults to `False`.
 
 Returns:
 
