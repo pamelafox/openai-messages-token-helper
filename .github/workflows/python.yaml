@@ -30,4 +30,4 @@ jobs:
           run: black . --check --verbose
         - name: Run unit tests
           run: |
-            python3 -m pytest
+            python3 -m pytest -s -vv --cov --cov-fail-under=99
