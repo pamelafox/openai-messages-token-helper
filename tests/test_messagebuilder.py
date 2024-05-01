@@ -1,6 +1,7 @@
 import pytest
 from openai_messages_token_helper import build_messages, count_tokens_for_message
 
+from .functions import search_sources_toolchoice_auto
 from .messages import (
     assistant_message_dresscode,
     assistant_message_perf,
@@ -27,14 +28,14 @@ def test_messagebuilder_imagemessage():
     messages = build_messages(
         "gpt-35-turbo",
         system_message_short["message"]["content"],
-        new_user_message=text_and_image_message["message"]["content"],
+        new_user_content=text_and_image_message["message"]["content"],
     )
     assert messages == [system_message_short["message"], text_and_image_message["message"]]
 
 
 def test_messagebuilder_append():
     messages = build_messages(
-        "gpt-35-turbo", system_message_short["message"]["content"], new_user_message=user_message["message"]["content"]
+        "gpt-35-turbo", system_message_short["message"]["content"], new_user_content=user_message["message"]["content"]
     )
     assert messages == [system_message_short["message"], user_message["message"]]
     assert count_tokens_for_message("gpt-35-turbo", messages[0]) == system_message_short["count"]
@@ -51,7 +52,7 @@ def test_messagebuilder_unicode_append():
     messages = build_messages(
         "gpt-35-turbo",
         system_message_unicode["message"]["content"],
-        new_user_message=user_message_unicode["message"]["content"],
+        new_user_content=user_message_unicode["message"]["content"],
     )
     assert messages == [system_message_unicode["message"], user_message_unicode["message"]]
     assert count_tokens_for_message("gpt-35-turbo", messages[0]) == system_message_unicode["count"]
@@ -62,7 +63,7 @@ def test_messagebuilder_model_error():
     model = "phi-3"
     with pytest.raises(ValueError, match="Called with unknown model name: phi-3"):
         build_messages(
-            model, system_message_short["message"]["content"], new_user_message=user_message["message"]["content"]
+            model, system_message_short["message"]["content"], new_user_content=user_message["message"]["content"]
         )
 
 
@@ -71,7 +72,7 @@ def test_messagebuilder_model_fallback():
     messages = build_messages(
         model,
         system_message_short["message"]["content"],
-        new_user_message=user_message["message"]["content"],
+        new_user_content=user_message["message"]["content"],
         fallback_to_default=True,
     )
     assert messages == [system_message_short["message"], user_message["message"]]
@@ -87,7 +88,7 @@ def test_messagebuilder_pastmessages():
             user_message_perf["message"],  # 14 tokens
             assistant_message_perf["message"],  # 106 tokens
         ],
-        new_user_message=user_message_pm["message"]["content"],  # 14 tokens
+        new_user_content=user_message_pm["message"]["content"],  # 14 tokens
         max_tokens=3000,
     )
     assert messages == [
@@ -106,7 +107,7 @@ def test_messagebuilder_pastmessages_truncated():
             user_message_perf["message"],  # 14 tokens
             assistant_message_perf["message"],  # 106 tokens
         ],
-        new_user_message=user_message_pm["message"]["content"],  # 14 tokens
+        new_user_content=user_message_pm["message"]["content"],  # 14 tokens
         max_tokens=10,
     )
     assert messages == [system_message_short["message"], user_message_pm["message"]]
@@ -122,7 +123,7 @@ def test_messagebuilder_pastmessages_truncated_longer():
             user_message_dresscode["message"],  # 13 tokens
             assistant_message_dresscode["message"],  # 30 tokens
         ],
-        new_user_message=user_message_pm["message"]["content"],  # 14 tokens
+        new_user_content=user_message_pm["message"]["content"],  # 14 tokens
         max_tokens=69,
     )
     assert messages == [
@@ -144,7 +145,7 @@ def test_messagebuilder_pastmessages_truncated_break_pair():
             user_message_dresscode["message"],  # 13 tokens
             assistant_message_dresscode["message"],  # 30 tokens
         ],
-        new_user_message=user_message_pm["message"]["content"],  # 14 tokens
+        new_user_content=user_message_pm["message"]["content"],  # 14 tokens
         max_tokens=160,
     )
     assert messages == [
@@ -167,7 +168,7 @@ def test_messagebuilder_system():
             user_message_dresscode["message"],  # 13 tokens
             assistant_message_dresscode["message"],  # 30 tokens
         ],
-        new_user_message=user_message_pm["message"]["content"],  # 14 tokens
+        new_user_content=user_message_pm["message"]["content"],  # 14 tokens
         max_tokens=36,
     )
     assert messages == [system_message_long["message"], user_message_pm["message"]]
@@ -177,7 +178,7 @@ def test_messagebuilder_system_fewshots():
     messages = build_messages(
         model="gpt-35-turbo",
         system_prompt=system_message_short["message"]["content"],
-        new_user_message=user_message_pm["message"]["content"],
+        new_user_content=user_message_pm["message"]["content"],
         past_messages=[],
         few_shots=[
             {"role": "user", "content": "How did crypto do last year?"},
@@ -194,3 +195,21 @@ def test_messagebuilder_system_fewshots():
     assert messages[4]["role"] == "assistant"
     assert messages[5]["role"] == "user"
     assert messages[5]["content"] == user_message_pm["message"]["content"]
+
+
+def test_messagebuilder_system_tools():
+    """Tests that the system message token count is considered."""
+    messages = build_messages(
+        model="gpt-35-turbo",
+        system_prompt=search_sources_toolchoice_auto["system_message"]["content"],
+        tools=search_sources_toolchoice_auto["tools"],
+        tool_choice=search_sources_toolchoice_auto["tool_choice"],
+        # 66 tokens for system + tools + tool_choice ^
+        past_messages=[
+            user_message_perf["message"],  # 14 tokens
+            assistant_message_perf["message"],  # 106 tokens
+        ],
+        new_user_content=user_message_pm["message"]["content"],  # 14 tokens
+        max_tokens=90,
+    )
+    assert messages == [search_sources_toolchoice_auto["system_message"], user_message_pm["message"]]

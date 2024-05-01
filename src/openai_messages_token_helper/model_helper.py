@@ -5,6 +5,7 @@ from collections.abc import Mapping
 
 import tiktoken
 
+from .function_format import format_function_definitions
 from .images_helper import count_tokens_for_image
 
 MODELS_2_TOKEN_LIMITS = {
@@ -42,6 +43,32 @@ def get_token_limit(model: str, default_to_minimum=False) -> int:
     return MODELS_2_TOKEN_LIMITS[model]
 
 
+def encoding_for_model(model: str, default_to_cl100k=False) -> tiktoken.Encoding:
+    """
+    Get the encoding for a given GPT model name (OpenAI.com or Azure OpenAI supported).
+    Args:
+        model (str): The name of the model to get the encoding for.
+        default_to_cl100k (bool): Whether to default to the CL100k encoding if the model is not found.
+    Returns:
+        tiktoken.Encoding: The encoding for the model.
+    """
+    if (
+        model == ""
+        or model is None
+        or (model not in AOAI_2_OAI and model not in MODELS_2_TOKEN_LIMITS and not default_to_cl100k)
+    ):
+        raise ValueError("Expected valid OpenAI GPT model name")
+    model = AOAI_2_OAI.get(model, model)
+    try:
+        return tiktoken.encoding_for_model(model)
+    except KeyError:
+        if default_to_cl100k:
+            logger.warning("Model %s not found, defaulting to CL100k encoding", model)
+            return tiktoken.get_encoding("cl100k_base")
+        else:
+            raise
+
+
 def count_tokens_for_message(model: str, message: Mapping[str, object], default_to_cl100k=False) -> int:
     """
     Calculate the number of tokens required to encode a message. Based off cookbook:
@@ -59,21 +86,7 @@ def count_tokens_for_message(model: str, message: Mapping[str, object], default_
     >> count_tokens_for_message(model, message)
     13
     """
-    if (
-        model == ""
-        or model is None
-        or (model not in AOAI_2_OAI and model not in MODELS_2_TOKEN_LIMITS and not default_to_cl100k)
-    ):
-        raise ValueError("Expected valid OpenAI GPT model name")
-    model = AOAI_2_OAI.get(model, model)
-    try:
-        encoding = tiktoken.encoding_for_model(model)
-    except KeyError:
-        if default_to_cl100k:
-            logger.warning("Model %s not found, defaulting to CL100k encoding", model)
-            encoding = tiktoken.get_encoding("cl100k_base")
-        else:
-            raise
+    encoding = encoding_for_model(model, default_to_cl100k)
 
     # Assumes we're using a recent model
     tokens_per_message = 3
@@ -96,3 +109,48 @@ def count_tokens_for_message(model: str, message: Mapping[str, object], default_
             num_tokens += 1
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
     return num_tokens
+
+
+def count_tokens_for_system_and_tools(
+    model: str,
+    system_message: dict | None = None,
+    tools: list[dict[str, dict]] | None = None,
+    tool_choice: str | dict | None = None,
+    default_to_cl100k: bool = False,
+) -> int:
+    """
+    Calculate the number of tokens required to encode a system message and tools.
+    Both must be calculated together because the count is lower if both are present.
+    Based on https://github.com/forestwanglin/openai-java/blob/main/jtokkit/src/main/java/xyz/felh/openai/jtokkit/utils/TikTokenUtils.java
+
+    Args:
+        model (str): The name of the model to use for encoding.
+        tools (list[dict[str, dict]]): The tools to encode.
+        tool_choice (str | dict): The tool choice to encode.
+        system_message (dict): The system message to encode.
+        default_to_cl100k (bool): Whether to default to the CL100k encoding if the model is not found.
+    Returns:
+        int: The total number of tokens required to encode the system message and tools.
+    """
+    encoding = encoding_for_model(model, default_to_cl100k)
+
+    tokens = 0
+    if system_message:
+        tokens += count_tokens_for_message(model, system_message, default_to_cl100k)
+    if tools:
+        encoding = tiktoken.encoding_for_model(model)
+        print(format_function_definitions(tools))
+        tokens += len(encoding.encode(format_function_definitions(tools)))
+        tokens += 9  # Additional tokens for function definition of tools
+    # If there's a system message and tools are present, subtract four tokens
+    if tools and system_message:
+        tokens -= 4
+    # If tool_choice is 'none', add one token.
+    # If it's an object, add 4 + the number of tokens in the function name.
+    # If it's undefined or 'auto', don't add anything.
+    if tool_choice == "none":
+        tokens += 1
+    elif isinstance(tool_choice, dict):
+        tokens += 7
+        tokens += len(encoding.encode(tool_choice["function"]["name"]))
+    return tokens
