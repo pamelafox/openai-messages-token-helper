@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.1] - May 2, 2024
+## [0.1.2] - May 2, 2024
 
 - Add `py.typed` file so that mypy can find the type hints in this package.
 
