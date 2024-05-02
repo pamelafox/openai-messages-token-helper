@@ -1,6 +1,7 @@
 import pytest
-from openai_messages_token_helper import count_tokens_for_message, get_token_limit
+from openai_messages_token_helper import count_tokens_for_message, count_tokens_for_system_and_tools, get_token_limit
 
+from .functions import FUNCTION_COUNTS
 from .messages import system_message, system_message_with_name, text_and_image_message, user_message
 
 
@@ -78,3 +79,21 @@ def test_count_tokens_for_message_model_default(caplog):
     with caplog.at_level("WARNING"):
         assert count_tokens_for_message(model, user_message["message"], default_to_cl100k=True) == user_message["count"]
         assert "Model phi-3 not found, defaulting to CL100k encoding" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "function_count_pair",
+    FUNCTION_COUNTS,
+)
+def test_count_tokens_for_system_and_tools(function_count_pair):
+    counted_tokens = count_tokens_for_system_and_tools(
+        "gpt-35-turbo",
+        function_count_pair["system_message"],
+        function_count_pair["tools"],
+        function_count_pair["tool_choice"],
+    )
+    expected_tokens = function_count_pair["count"]
+    diff = counted_tokens - expected_tokens
+    assert (
+        diff >= 0 and diff <= 3
+    ), f"Expected {expected_tokens} tokens, got {counted_tokens}. Counted tokens is only allowed to be off by 3 in the over-counting direction."

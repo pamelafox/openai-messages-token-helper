@@ -10,10 +10,20 @@ from openai.types.chat import (
     ChatCompletionUserMessageParam,
 )
 
-from .model_helper import count_tokens_for_message, get_token_limit
+from .model_helper import count_tokens_for_message, count_tokens_for_system_and_tools, get_token_limit
 
 
-class MessageBuilder:
+def normalize_content(content: Union[str, list[ChatCompletionContentPartParam]]):
+    if isinstance(content, str):
+        return unicodedata.normalize("NFC", content)
+    elif isinstance(content, list):
+        for part in content:
+            if "image_url" not in part:
+                part["text"] = unicodedata.normalize("NFC", part["text"])
+        return content
+
+
+class _MessageBuilder:
     """
     A class for building and managing messages in a chat conversation.
     Attributes:
@@ -25,11 +35,10 @@ class MessageBuilder:
         insert_message(self, role: str, content: str, index: int = 1): Inserts a new message to the conversation.
     """
 
-    def __init__(self, system_content: str, chatgpt_model: str):
+    def __init__(self, system_content: str):
         self.messages: list[ChatCompletionMessageParam] = [
-            ChatCompletionSystemMessageParam(role="system", content=unicodedata.normalize("NFC", system_content))
+            ChatCompletionSystemMessageParam(role="system", content=normalize_content(system_content))
         ]
-        self.model = chatgpt_model
 
     def insert_message(self, role: str, content: Union[str, list[ChatCompletionContentPartParam]], index: int = 1):
         """
@@ -42,29 +51,21 @@ class MessageBuilder:
         """
         message: ChatCompletionMessageParam
         if role == "user":
-            message = ChatCompletionUserMessageParam(role="user", content=self.normalize_content(content))
+            message = ChatCompletionUserMessageParam(role="user", content=normalize_content(content))
         elif role == "assistant" and isinstance(content, str):
-            message = ChatCompletionAssistantMessageParam(
-                role="assistant", content=unicodedata.normalize("NFC", content)
-            )
+            message = ChatCompletionAssistantMessageParam(role="assistant", content=normalize_content(content))
         else:
             raise ValueError(f"Invalid role: {role}")
         self.messages.insert(index, message)
-
-    def normalize_content(self, content: Union[str, list[ChatCompletionContentPartParam]]):
-        if isinstance(content, str):
-            return unicodedata.normalize("NFC", content)
-        elif isinstance(content, list):
-            for part in content:
-                if "image_url" not in part:
-                    part["text"] = unicodedata.normalize("NFC", part["text"])
-            return content
 
 
 def build_messages(
     model: str,
     system_prompt: str,
-    new_user_message: Union[str, list[ChatCompletionContentPartParam], None] = None,  # list is for GPT4v usage
+    *,
+    tools: Optional[list[dict[str, dict]]] = None,
+    tool_choice: Optional[Union[str, dict]] = None,
+    new_user_content: Union[str, list[ChatCompletionContentPartParam], None] = None,  # list is for GPT4v usage
     past_messages: list[dict[str, str]] = [],  # *not* including system prompt
     few_shots=[],  # will always be inserted after system prompt
     max_tokens: Optional[int] = None,
@@ -77,26 +78,32 @@ def build_messages(
     Args:
         model (str): The model name to use for token calculation, like gpt-3.5-turbo.
         system_prompt (str): The initial system prompt message.
-        new_user_message (str | List[ChatCompletionContentPartParam]): The new user message to append.
+        tools (list[dict]): A list of tools to include in the conversation.
+        tool_choice (str | dict): The tool to use in the conversation.
+        new_user_content (str | List[ChatCompletionContentPartParam]): Content of new user message to append.
         past_messages (list[dict]): The list of past messages in the conversation.
         few_shots (list[dict]): A few-shot list of messages to insert after the system prompt.
         max_tokens (int): The maximum number of tokens allowed for the conversation.
         fallback_to_default (bool): Whether to fallback to default model if the model is not found.
     """
-    message_builder = MessageBuilder(system_prompt, model)
     if max_tokens is None:
         max_tokens = get_token_limit(model, default_to_minimum=fallback_to_default)
+
+    # Start with the required messages: system prompt, few-shots, and new user message
+    message_builder = _MessageBuilder(system_prompt)
 
     for shot in reversed(few_shots):
         message_builder.insert_message(shot.get("role"), shot.get("content"))
 
     append_index = len(few_shots) + 1
 
-    if new_user_message:
-        message_builder.insert_message("user", new_user_message, index=append_index)
+    if new_user_content:
+        message_builder.insert_message("user", new_user_content, index=append_index)
 
-    total_token_count = 0
-    for existing_message in message_builder.messages:
+    total_token_count = count_tokens_for_system_and_tools(
+        model, message_builder.messages[0], tools, tool_choice, default_to_cl100k=fallback_to_default
+    )
+    for existing_message in message_builder.messages[1:]:
         total_token_count += count_tokens_for_message(model, existing_message, default_to_cl100k=fallback_to_default)
 
     newest_to_oldest = list(reversed(past_messages))

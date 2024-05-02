@@ -31,11 +31,14 @@ Arguments:
 
 * `model` (`str`): The model name to use for token calculation, like gpt-3.5-turbo.
 * `system_prompt` (`str`): The initial system prompt message.
-* `new_user_message` (`str | List[openai.types.chat.ChatCompletionContentPartParam]`): The new user message to append.
-* `past_messages` (`list[dict]`): The list of past messages in the conversation.
-* `few_shots` (`list[dict]`): A few-shot list of messages to insert after the system prompt.
-* `max_tokens` (`int`): The maximum number of tokens allowed for the conversation.
-* `fallback_to_default` (`bool`): Whether to fallback to default model/token limits if model is not found. Defaults to `False`.
+* `tools` (`List[openai.types.chat.ChatCompletionToolParam]`): (Optional) The tools that will be used in the conversation. These won't be part of the final returned messages, but they will be used to calculate the token count.
+* `tool_choice` (`str | dict`): (Optional) The tool choice that will be used in the conversation. This won't be part of the final returned messages, but it will be used to calculate the token count.
+* `new_user_content` (`str | List[openai.types.chat.ChatCompletionContentPartParam]`): (Optional) The content of new user message to append.
+* `past_messages` (`list[dict]`): (Optional) The list of past messages in the conversation.
+* `few_shots` (`list[dict]`): (Optional) A few-shot list of messages to insert after the system prompt.
+* `max_tokens` (`int`): (Optional) The maximum number of tokens allowed for the conversation.
+* `fallback_to_default` (`bool`): (Optional) Whether to fallback to default model/token limits if model is not found. Defaults to `False`.
+
 
 Returns:
 
@@ -49,7 +52,7 @@ from openai_messages_token_helper import build_messages
 messages = build_messages(
     model="gpt-35-turbo",
     system_prompt="You are a bot.",
-    new_user_message="That wasn't a good poem.",
+    new_user_content="That wasn't a good poem.",
     past_messages=[
         {
             "role": "user",
