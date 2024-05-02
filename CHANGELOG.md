@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.0] - May 1, 2024
+## [0.1.0] - May 2, 2024
 
 - Add `count_tokens_for_system_and_tools` to count tokens for system message and tools. You should count the tokens for both together, since the token count for tools varies based off whether a system message is provided.
 - Updated `build_messages` to allow for `tools` and `tool_choice` to be passed in.
