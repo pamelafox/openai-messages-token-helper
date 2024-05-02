@@ -1,4 +1,7 @@
+import typing
+
 import pytest
+from openai.types.chat import ChatCompletionMessageParam, ChatCompletionNamedToolChoiceParam, ChatCompletionToolParam
 from openai_messages_token_helper import build_messages, count_tokens_for_message
 
 from .functions import search_sources_toolchoice_auto
@@ -213,3 +216,48 @@ def test_messagebuilder_system_tools():
         max_tokens=90,
     )
     assert messages == [search_sources_toolchoice_auto["system_message"], user_message_pm["message"]]
+
+
+def test_messagebuilder_typing() -> None:
+    tools: list[ChatCompletionToolParam] = [
+        {
+            "type": "function",
+            "function": {
+                "name": "search_sources",
+                "description": "Retrieve sources from the Azure AI Search index",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "search_query": {
+                            "type": "string",
+                            "description": "Query string to retrieve documents from azure search eg: 'Health care plan'",
+                        }
+                    },
+                    "required": ["search_query"],
+                },
+            },
+        }
+    ]
+    tool_choice: ChatCompletionNamedToolChoiceParam = {
+        "type": "function",
+        "function": {"name": "search_sources"},
+    }
+
+    past_messages: list[ChatCompletionMessageParam] = [
+        {"role": "user", "content": "What are my health plans?"},
+        {"role": "assistant", "content": "Here are some tools you can use to search for sources."},
+    ]
+
+    messages = build_messages(
+        model="gpt-35-turbo",
+        system_prompt="Here are some tools you can use to search for sources.",
+        tools=tools,
+        tool_choice=tool_choice,
+        past_messages=past_messages,
+        new_user_content="What are my health plans?",
+        max_tokens=90,
+    )
+
+    assert isinstance(messages, list)
+    if hasattr(typing, "assert_type"):
+        typing.assert_type(messages[0], ChatCompletionMessageParam)

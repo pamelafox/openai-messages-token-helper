@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.3] - May 2, 2024
+
+- Use openai type annotations for more precise type hints, and add a typing test.
+
 ## [0.1.2] - May 2, 2024
 
 - Add `py.typed` file so that mypy can find the type hints in this package.
