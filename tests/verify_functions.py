@@ -1,4 +1,5 @@
 import os
+from typing import Union
 
 import azure.identity
 import openai
@@ -9,7 +10,7 @@ from functions import FUNCTION_COUNTS  # type: ignore[import-not-found]
 load_dotenv()
 API_HOST = os.getenv("API_HOST")
 
-client: openai.OpenAI | openai.AzureOpenAI
+client: Union[openai.OpenAI, openai.AzureOpenAI]
 
 if API_HOST == "azure":
 
