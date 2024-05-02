@@ -113,7 +113,7 @@ def count_tokens_for_message(model: str, message: Mapping[str, object], default_
 
 def count_tokens_for_system_and_tools(
     model: str,
-    system_message: dict | None = None,
+    system_message: Mapping[str, object] | None = None,
     tools: list[dict[str, dict]] | None = None,
     tool_choice: str | dict | None = None,
     default_to_cl100k: bool = False,

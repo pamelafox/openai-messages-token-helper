@@ -1,7 +1,7 @@
 [project]
 name = "openai-messages-token-helper"
 description = "A helper library for estimating tokens used by messages sent through OpenAI Chat Completions API."
-version = "0.1.0"
+version = "0.1.1"
 authors = [{name = "Pamela Fox"}]
 requires-python = ">=3.9"
 readme = "README.md"
@@ -33,7 +33,8 @@ dev = [
     "black",
     "flit",
     "azure-identity",
-    "python-dotenv"
+    "python-dotenv",
+    "mypy"
 ]
 
 [build-system]

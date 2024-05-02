@@ -31,3 +31,5 @@ jobs:
         - name: Run unit tests
           run: |
             python3 -m pytest -s -vv --cov --cov-fail-under=99
+        - name: Run type checks
+          run: mypy .
