@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - Add `count_tokens_for_system_and_tools` to count tokens for system message and tools. You should count the tokens for both together, since the token count for tools varies based off whether a system message is provided.
 - Updated `build_messages` to allow for `tools` and `tool_choice` to be passed in.
+- Breaking change: Changed `new_user_message` to `new_user_content` in `build_messages` for clarity.
 
 ## [0.0.6] - April 24, 2024
 
