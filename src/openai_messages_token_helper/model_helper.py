@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping
 
 import tiktoken
+from openai.types.chat import (
+    ChatCompletionMessageParam,
+    ChatCompletionNamedToolChoiceParam,
+    ChatCompletionSystemMessageParam,
+    ChatCompletionToolParam,
+)
 
 from .function_format import format_function_definitions
 from .images_helper import count_tokens_for_image
@@ -69,7 +74,7 @@ def encoding_for_model(model: str, default_to_cl100k=False) -> tiktoken.Encoding
             raise
 
 
-def count_tokens_for_message(model: str, message: Mapping[str, object], default_to_cl100k=False) -> int:
+def count_tokens_for_message(model: str, message: ChatCompletionMessageParam, default_to_cl100k=False) -> int:
     """
     Calculate the number of tokens required to encode a message. Based off cookbook:
     https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
@@ -113,9 +118,9 @@ def count_tokens_for_message(model: str, message: Mapping[str, object], default_
 
 def count_tokens_for_system_and_tools(
     model: str,
-    system_message: Mapping[str, object] | None = None,
-    tools: list[dict[str, dict]] | None = None,
-    tool_choice: str | dict | None = None,
+    system_message: ChatCompletionSystemMessageParam | None = None,
+    tools: list[ChatCompletionToolParam] | None = None,
+    tool_choice: ChatCompletionNamedToolChoiceParam | None = None,
     default_to_cl100k: bool = False,
 ) -> int:
     """

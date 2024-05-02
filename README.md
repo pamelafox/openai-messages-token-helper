@@ -32,10 +32,10 @@ Arguments:
 * `model` (`str`): The model name to use for token calculation, like gpt-3.5-turbo.
 * `system_prompt` (`str`): The initial system prompt message.
 * `tools` (`List[openai.types.chat.ChatCompletionToolParam]`): (Optional) The tools that will be used in the conversation. These won't be part of the final returned messages, but they will be used to calculate the token count.
-* `tool_choice` (`str | dict`): (Optional) The tool choice that will be used in the conversation. This won't be part of the final returned messages, but it will be used to calculate the token count.
+* `tool_choice` (`openai.types.chat.ChatCompletionNamedToolChoiceParam`): (Optional) The tool choice that will be used in the conversation. This won't be part of the final returned messages, but it will be used to calculate the token count.
 * `new_user_content` (`str | List[openai.types.chat.ChatCompletionContentPartParam]`): (Optional) The content of new user message to append.
-* `past_messages` (`list[dict]`): (Optional) The list of past messages in the conversation.
-* `few_shots` (`list[dict]`): (Optional) A few-shot list of messages to insert after the system prompt.
+* `past_messages` (`list[openai.types.chat.ChatCompletionMessageParam]`): (Optional) The list of past messages in the conversation.
+* `few_shots` (`list[openai.types.chat.ChatCompletionMessageParam]`): (Optional) A few-shot list of messages to insert after the system prompt.
 * `max_tokens` (`int`): (Optional) The maximum number of tokens allowed for the conversation.
 * `fallback_to_default` (`bool`): (Optional) Whether to fallback to default model/token limits if model is not found. Defaults to `False`.
 
@@ -83,7 +83,7 @@ Counts the number of tokens in a message.
 Arguments:
 
 * `model` (`str`): The model name to use for token calculation, like gpt-3.5-turbo.
-* `message` (`dict`): The message to count tokens for.
+* `message` (`openai.types.chat.ChatCompletionMessageParam`): The message to count tokens for.
 * `default_to_cl100k` (`bool`): Whether to default to the CL100k token limit if the model is not found.
 
 Returns:
