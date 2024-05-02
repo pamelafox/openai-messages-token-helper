@@ -44,15 +44,15 @@ class _MessageBuilder:
         self.messages: list[ChatCompletionMessageParam] = []
 
     @property
-    def all_messages(self):
+    def all_messages(self) -> list[ChatCompletionMessageParam]:
         return [self.system_message] + self.messages
 
     def insert_message(
-        self, role: ChatCompletionRole, content: Union[str, Iterable[ChatCompletionContentPartParam]], index: int = 1
+        self, role: ChatCompletionRole, content: Union[str, Iterable[ChatCompletionContentPartParam]], index: int = 0
     ):
         """
         Inserts a message into the conversation at the specified index,
-        or at index 1 (after system message) if no index is specified.
+        or at index 0 if no index is specified.
         Args:
             role (str): The role of the message sender (either "user", "system", or "assistant").
             content (str | List[ChatCompletionContentPartParam]): The content of the message.
@@ -106,7 +106,7 @@ def build_messages(
             raise ValueError("Few-shot messages must have both role and content")
         message_builder.insert_message(shot["role"], shot["content"])
 
-    append_index = len(few_shots) + 1
+    append_index = len(few_shots)
 
     if new_user_content:
         message_builder.insert_message("user", new_user_content, index=append_index)
