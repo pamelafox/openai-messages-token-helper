@@ -12,6 +12,7 @@ def test_get_token_limit():
     assert get_token_limit("gpt-3.5-turbo-16k") == 16000
     assert get_token_limit("gpt-4") == 8100
     assert get_token_limit("gpt-4-32k") == 32000
+    assert get_token_limit("gpt-4o") == 128000
 
 
 def test_get_token_limit_error():
@@ -27,15 +28,16 @@ def test_get_token_limit_default(caplog):
 
 # parameterize the model and the expected number of tokens
 @pytest.mark.parametrize(
-    "model",
+    "model, count_key",
     [
-        "gpt-35-turbo",
-        "gpt-3.5-turbo",
-        "gpt-35-turbo-16k",
-        "gpt-3.5-turbo-16k",
-        "gpt-4",
-        "gpt-4-32k",
-        "gpt-4v",
+        ("gpt-35-turbo", "count"),
+        ("gpt-3.5-turbo", "count"),
+        ("gpt-35-turbo-16k", "count"),
+        ("gpt-3.5-turbo-16k", "count"),
+        ("gpt-4", "count"),
+        ("gpt-4-32k", "count"),
+        ("gpt-4v", "count"),
+        ("gpt-4o", "count_omni"),
     ],
 )
 @pytest.mark.parametrize(
@@ -46,13 +48,19 @@ def test_get_token_limit_default(caplog):
         system_message_with_name,
     ],
 )
-def test_count_tokens_for_message(model: str, message: dict):
-    assert count_tokens_for_message(model, message["message"]) == message["count"]
+def test_count_tokens_for_message(model, count_key, message):
+    assert count_tokens_for_message(model, message["message"]) == message[count_key]
 
 
-def test_count_tokens_for_message_list():
-    model = "gpt-4"
-    assert count_tokens_for_message(model, text_and_image_message["message"]) == text_and_image_message["count"]
+@pytest.mark.parametrize(
+    "model, count_key",
+    [
+        ("gpt-4", "count"),
+        ("gpt-4o", "count_omni"),
+    ],
+)
+def test_count_tokens_for_message_list(model, count_key):
+    assert count_tokens_for_message(model, text_and_image_message["message"]) == text_and_image_message[count_key]
 
 
 def test_count_tokens_for_message_error():
