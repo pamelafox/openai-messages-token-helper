@@ -48,7 +48,7 @@ def test_get_token_limit_default(caplog):
         system_message_with_name,
     ],
 )
-def test_count_tokens_for_message(model: str, count_key: str, message: dict):
+def test_count_tokens_for_message(model, count_key, message):
     assert count_tokens_for_message(model, message["message"]) == message[count_key]
 
 
@@ -59,7 +59,7 @@ def test_count_tokens_for_message(model: str, count_key: str, message: dict):
         ("gpt-4o", "count_omni"),
     ],
 )
-def test_count_tokens_for_message_list(model: str, count_key: str):
+def test_count_tokens_for_message_list(model, count_key):
     assert count_tokens_for_message(model, text_and_image_message["message"]) == text_and_image_message[count_key]
 
 
