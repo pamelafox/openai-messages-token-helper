@@ -39,16 +39,19 @@ else:
 
 # Test the token count for each message
 for message_count_pair in MESSAGE_COUNTS:
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        temperature=0.7,
-        n=1,
-        messages=[message_count_pair["message"]],  # type: ignore[list-item]
-    )
+    for model, expected_tokens in [
+        (MODEL_NAME, message_count_pair["count"]),
+        ("gpt-4o", message_count_pair["count_omni"]),
+    ]:
+        response = client.chat.completions.create(
+            model=model,
+            temperature=0.7,
+            n=1,
+            messages=[message_count_pair["message"]],  # type: ignore[list-item]
+        )
 
-    print(message_count_pair["message"])
-    expected_tokens = message_count_pair["count"]
-    assert response.usage is not None, "Expected usage to be present"
-    assert (
-        response.usage.prompt_tokens == expected_tokens
-    ), f"Expected {expected_tokens} tokens, got {response.usage.prompt_tokens}"
+        print(message_count_pair["message"])
+        assert response.usage is not None, "Expected usage to be present"
+        assert (
+            response.usage.prompt_tokens == expected_tokens
+        ), f"Expected {expected_tokens} tokens, got {response.usage.prompt_tokens} for model {model}"

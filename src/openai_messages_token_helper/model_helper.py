@@ -21,6 +21,7 @@ MODELS_2_TOKEN_LIMITS = {
     "gpt-4": 8100,
     "gpt-4-32k": 32000,
     "gpt-4v": 128000,
+    "gpt-4o": 128000,
 }
 
 
