@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.5] - June 4, 2024
+
+- Remove spurious `print` call when counting tokens for function calling.
+
 ## [0.1.4] - May 14, 2024
 
 - Add support and tests for gpt-4o, which has a different tokenizer.
