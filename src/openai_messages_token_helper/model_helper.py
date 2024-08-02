@@ -144,7 +144,6 @@ def count_tokens_for_system_and_tools(
     if system_message:
         tokens += count_tokens_for_message(model, system_message, default_to_cl100k)
     if tools:
-        encoding = tiktoken.encoding_for_model(model)
         tokens += len(encoding.encode(format_function_definitions(tools)))
         tokens += 9  # Additional tokens for function definition of tools
     # If there's a system message and tools are present, subtract four tokens
