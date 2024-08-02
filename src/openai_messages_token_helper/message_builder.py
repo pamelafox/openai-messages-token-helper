@@ -7,6 +7,7 @@ from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
     ChatCompletionContentPartParam,
     ChatCompletionMessageParam,
+    ChatCompletionMessageToolCallParam,
     ChatCompletionNamedToolChoiceParam,
     ChatCompletionRole,
     ChatCompletionSystemMessageParam,
@@ -18,7 +19,9 @@ from openai.types.chat import (
 from .model_helper import count_tokens_for_message, count_tokens_for_system_and_tools, get_token_limit
 
 
-def normalize_content(content: Union[str, Iterable[ChatCompletionContentPartParam]]):
+def normalize_content(content: Union[str, Iterable[ChatCompletionContentPartParam], None]):
+    if content is None:
+        return None
     if isinstance(content, str):
         return unicodedata.normalize("NFC", content)
     else:
@@ -51,9 +54,9 @@ class _MessageBuilder:
     def insert_message(
         self,
         role: ChatCompletionRole,
-        content: Union[str, Iterable[ChatCompletionContentPartParam]],
+        content: Union[str, Iterable[ChatCompletionContentPartParam], None],
         index: int = 0,
-        tool_calls: Optional[list[ChatCompletionToolParam]] = None,
+        tool_calls: Optional[Iterable[ChatCompletionMessageToolCallParam]] = None,
         tool_call_id: Optional[str] = None,
     ):
         """
@@ -116,8 +119,14 @@ def build_messages(
     for shot in reversed(few_shots):
         if shot["role"] is None or (shot.get("content") is None and shot.get("tool_calls") is None):
             raise ValueError("Few-shot messages must have role and either content or tool_calls")
+        tool_call_id = shot.get("tool_call_id")
+        if tool_call_id is not None and not isinstance(tool_call_id, str):
+            raise ValueError("tool_call_id must be a string value")
+        tool_calls = shot.get("tool_calls")
+        if tool_calls is not None and not isinstance(tool_calls, Iterable):
+            raise ValueError("tool_calls must be a list of tool calls")
         message_builder.insert_message(
-            shot["role"], shot.get("content"), tool_calls=shot.get("tool_calls"), tool_call_id=shot.get("tool_call_id")
+            shot["role"], shot.get("content"), tool_calls=tool_calls, tool_call_id=tool_call_id
         )
 
     append_index = len(few_shots)
