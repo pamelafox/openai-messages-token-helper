@@ -1,7 +1,7 @@
 import pytest
 from openai_messages_token_helper import count_tokens_for_message, count_tokens_for_system_and_tools, get_token_limit
 
-from .functions import FUNCTION_COUNTS
+from .functions import FUNCTION_COUNTS, search_sources_toolchoice_auto
 from .messages import system_message, system_message_with_name, text_and_image_message, user_message
 
 
@@ -105,3 +105,17 @@ def test_count_tokens_for_system_and_tools(function_count_pair):
     assert (
         diff >= 0 and diff <= 3
     ), f"Expected {expected_tokens} tokens, got {counted_tokens}. Counted tokens is only allowed to be off by 3 in the over-counting direction."
+
+
+def test_count_tokens_for_system_and_tools_fallback(caplog):
+    function_count_pair = search_sources_toolchoice_auto
+    with caplog.at_level("WARNING"):
+        counted_tokens = count_tokens_for_system_and_tools(
+            "llama-3.1",
+            function_count_pair["system_message"],
+            function_count_pair["tools"],
+            function_count_pair["tool_choice"],
+            default_to_cl100k=True,
+        )
+        assert counted_tokens == function_count_pair["count"]
+        assert "Model llama-3.1 not found, defaulting to CL100k encoding" in caplog.text
