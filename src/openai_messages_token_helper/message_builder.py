@@ -10,6 +10,7 @@ from openai.types.chat import (
     ChatCompletionNamedToolChoiceParam,
     ChatCompletionRole,
     ChatCompletionSystemMessageParam,
+    ChatCompletionToolMessageParam,
     ChatCompletionToolParam,
     ChatCompletionUserMessageParam,
 )
@@ -48,7 +49,12 @@ class _MessageBuilder:
         return [self.system_message] + self.messages
 
     def insert_message(
-        self, role: ChatCompletionRole, content: Union[str, Iterable[ChatCompletionContentPartParam]], index: int = 0
+        self,
+        role: ChatCompletionRole,
+        content: Union[str, Iterable[ChatCompletionContentPartParam]],
+        index: int = 0,
+        tool_calls: Optional[list[ChatCompletionToolParam]] = None,
+        tool_call_id: Optional[str] = None,
     ):
         """
         Inserts a message into the conversation at the specified index,
@@ -63,8 +69,14 @@ class _MessageBuilder:
             message = ChatCompletionUserMessageParam(role="user", content=normalize_content(content))
         elif role == "assistant" and isinstance(content, str):
             message = ChatCompletionAssistantMessageParam(role="assistant", content=normalize_content(content))
+        elif role == "assistant" and tool_calls is not None:
+            message = ChatCompletionAssistantMessageParam(role="assistant", tool_calls=tool_calls)
+        elif role == "tool" and tool_call_id is not None:
+            message = ChatCompletionToolMessageParam(
+                role="tool", tool_call_id=tool_call_id, content=normalize_content(content)
+            )
         else:
-            raise ValueError(f"Invalid role: {role}")
+            raise ValueError("Invalid message for builder")
         self.messages.insert(index, message)
 
 
@@ -102,9 +114,11 @@ def build_messages(
     message_builder = _MessageBuilder(system_prompt)
 
     for shot in reversed(few_shots):
-        if shot["role"] is None or shot["content"] is None:
-            raise ValueError("Few-shot messages must have both role and content")
-        message_builder.insert_message(shot["role"], shot["content"])
+        if shot["role"] is None or (shot.get("content") is None and shot.get("tool_calls") is None):
+            raise ValueError("Few-shot messages must have role and either content or tool_calls")
+        message_builder.insert_message(
+            shot["role"], shot.get("content"), tool_calls=shot.get("tool_calls"), tool_call_id=shot.get("tool_call_id")
+        )
 
     append_index = len(few_shots)
 
