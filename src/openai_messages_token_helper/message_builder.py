@@ -8,9 +8,9 @@ from openai.types.chat import (
     ChatCompletionContentPartParam,
     ChatCompletionMessageParam,
     ChatCompletionMessageToolCallParam,
-    ChatCompletionNamedToolChoiceParam,
     ChatCompletionRole,
     ChatCompletionSystemMessageParam,
+    ChatCompletionToolChoiceOptionParam,
     ChatCompletionToolMessageParam,
     ChatCompletionToolParam,
     ChatCompletionUserMessageParam,
@@ -88,7 +88,7 @@ def build_messages(
     system_prompt: str,
     *,
     tools: Optional[list[ChatCompletionToolParam]] = None,
-    tool_choice: Optional[ChatCompletionNamedToolChoiceParam] = None,
+    tool_choice: Optional[ChatCompletionToolChoiceOptionParam] = None,
     new_user_content: Union[str, list[ChatCompletionContentPartParam], None] = None,  # list is for GPT4v usage
     past_messages: list[ChatCompletionMessageParam] = [],  # *not* including system prompt
     few_shots: list[ChatCompletionMessageParam] = [],  # will always be inserted after system prompt
@@ -103,7 +103,7 @@ def build_messages(
         model (str): The model name to use for token calculation, like gpt-3.5-turbo.
         system_prompt (str): The initial system prompt message.
         tools (list[ChatCompletionToolParam]): A list of tools to include in the conversation.
-        tool_choice (ChatCompletionNamedToolChoiceParam): The tool to use in the conversation.
+        tool_choice (ChatCompletionToolChoiceOptionParam): The tool to use in the conversation.
         new_user_content (str | List[ChatCompletionContentPartParam]): Content of new user message to append.
         past_messages (list[ChatCompletionMessageParam]): The list of past messages in the conversation.
         few_shots (list[ChatCompletionMessageParam]): A few-shot list of messages to insert after the system prompt.

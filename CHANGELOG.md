@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.8] - Aug 3, 2024
+
+- Fix the type for the tool_choice param to be inclusive of "auto" and other options.
+
 ## [0.1.7] - Aug 3, 2024
 
 - Fix bug where you couldn't pass in example tool calls in `few_shots` to `build_messages`.

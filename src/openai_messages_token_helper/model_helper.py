@@ -5,8 +5,8 @@ import logging
 import tiktoken
 from openai.types.chat import (
     ChatCompletionMessageParam,
-    ChatCompletionNamedToolChoiceParam,
     ChatCompletionSystemMessageParam,
+    ChatCompletionToolChoiceOptionParam,
     ChatCompletionToolParam,
 )
 
@@ -121,7 +121,7 @@ def count_tokens_for_system_and_tools(
     model: str,
     system_message: ChatCompletionSystemMessageParam | None = None,
     tools: list[ChatCompletionToolParam] | None = None,
-    tool_choice: ChatCompletionNamedToolChoiceParam | None = None,
+    tool_choice: ChatCompletionToolChoiceOptionParam | None = None,
     default_to_cl100k: bool = False,
 ) -> int:
     """
