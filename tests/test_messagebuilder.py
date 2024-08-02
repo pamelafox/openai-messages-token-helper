@@ -1,7 +1,11 @@
 import typing
 
 import pytest
-from openai.types.chat import ChatCompletionMessageParam, ChatCompletionNamedToolChoiceParam, ChatCompletionToolParam
+from openai.types.chat import (
+    ChatCompletionMessageParam,
+    ChatCompletionToolChoiceOptionParam,
+    ChatCompletionToolParam,
+)
 from openai_messages_token_helper import build_messages, count_tokens_for_message
 
 from .functions import search_sources_toolchoice_auto
@@ -293,7 +297,7 @@ def test_messagebuilder_typing() -> None:
             },
         }
     ]
-    tool_choice: ChatCompletionNamedToolChoiceParam = {
+    tool_choice: ChatCompletionToolChoiceOptionParam = {
         "type": "function",
         "function": {"name": "search_sources"},
     }
@@ -308,6 +312,20 @@ def test_messagebuilder_typing() -> None:
         system_prompt="Here are some tools you can use to search for sources.",
         tools=tools,
         tool_choice=tool_choice,
+        past_messages=past_messages,
+        new_user_content="What are my health plans?",
+        max_tokens=90,
+    )
+
+    assert isinstance(messages, list)
+    if hasattr(typing, "assert_type"):
+        typing.assert_type(messages[0], ChatCompletionMessageParam)
+
+    messages = build_messages(
+        model="gpt-35-turbo",
+        system_prompt="Here are some tools you can use to search for sources.",
+        tools=tools,
+        tool_choice="auto",
         past_messages=past_messages,
         new_user_content="What are my health plans?",
         max_tokens=90,
