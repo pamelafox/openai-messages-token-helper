@@ -200,6 +200,61 @@ def test_messagebuilder_system_fewshots():
     assert messages[5]["content"] == user_message_pm["message"]["content"]
 
 
+def test_messagebuilder_system_fewshotstools():
+    messages = build_messages(
+        model="gpt-35-turbo",
+        system_prompt=system_message_short["message"]["content"],
+        new_user_content=user_message_pm["message"]["content"],
+        past_messages=[],
+        few_shots=[
+            {"role": "user", "content": "good options for climbing gear that can be used outside?"},
+            {
+                "role": "assistant",
+                "tool_calls": [
+                    {
+                        "id": "call_abc123",
+                        "type": "function",
+                        "function": {
+                            "arguments": '{"search_query":"climbing gear outside"}',
+                            "name": "search_database",
+                        },
+                    }
+                ],
+            },
+            {
+                "role": "tool",
+                "tool_call_id": "call_abc123",
+                "content": "Search results for climbing gear that can be used outside: ...",
+            },
+            {"role": "user", "content": "are there any shoes less than $50?"},
+            {
+                "role": "assistant",
+                "tool_calls": [
+                    {
+                        "id": "call_abc456",
+                        "type": "function",
+                        "function": {
+                            "arguments": '{"search_query":"shoes","price_filter":{"comparison_operator":"<","value":50}}',
+                            "name": "search_database",
+                        },
+                    }
+                ],
+            },
+            {"role": "tool", "tool_call_id": "call_abc456", "content": "Search results for shoes cheaper than 50: ..."},
+        ],
+    )
+    # Make sure messages are in the right order
+    assert messages[0]["role"] == "system"
+    assert messages[1]["role"] == "user"
+    assert messages[2]["role"] == "assistant"
+    assert messages[3]["role"] == "tool"
+    assert messages[4]["role"] == "user"
+    assert messages[5]["role"] == "assistant"
+    assert messages[6]["role"] == "tool"
+    assert messages[7]["role"] == "user"
+    assert messages[7]["content"] == user_message_pm["message"]["content"]
+
+
 def test_messagebuilder_system_tools():
     """Tests that the system message token count is considered."""
     messages = build_messages(
