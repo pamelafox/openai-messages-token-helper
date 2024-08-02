@@ -17,10 +17,14 @@ python3 -m pytest
 
 ## Publishing
 
-Publish to PyPi:
+1. Update the version number in pyproject.toml
 
-```shell
-export FLIT_USERNAME=__token__
-export FLIT_PASSWORD=<your-pypi-token>
-flit publish
-```
+2. Push the changes to the main branch
+
+3. Publish to PyPi:
+
+    ```shell
+    export FLIT_USERNAME=__token__
+    export FLIT_PASSWORD=<your-pypi-token>
+    flit publish
+    ```
