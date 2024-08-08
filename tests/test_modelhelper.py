@@ -2,7 +2,8 @@ import pytest
 from openai_messages_token_helper import count_tokens_for_message, count_tokens_for_system_and_tools, get_token_limit
 
 from .functions import FUNCTION_COUNTS, search_sources_toolchoice_auto
-from .messages import system_message, system_message_with_name, text_and_image_message, user_message
+from .image_messages import IMAGE_MESSAGE_COUNTS
+from .messages import system_message, system_message_with_name, user_message
 
 
 def test_get_token_limit():
@@ -56,11 +57,13 @@ def test_count_tokens_for_message(model, count_key, message):
     "model, count_key",
     [
         ("gpt-4", "count"),
-        ("gpt-4o", "count_omni"),
+        ("gpt-4o", "count"),
+        ("gpt-4o-mini", "count_4o_mini"),
     ],
 )
 def test_count_tokens_for_message_list(model, count_key):
-    assert count_tokens_for_message(model, text_and_image_message["message"]) == text_and_image_message[count_key]
+    for message_count_pair in IMAGE_MESSAGE_COUNTS:
+        assert count_tokens_for_message(model, message_count_pair["message"]) == message_count_pair[count_key]
 
 
 def test_count_tokens_for_message_error():

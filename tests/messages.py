@@ -146,5 +146,4 @@ MESSAGE_COUNTS = [
     assistant_message_perf,
     assistant_message_perf_short,
     assistant_message_dresscode,
-    text_and_image_message,
 ]

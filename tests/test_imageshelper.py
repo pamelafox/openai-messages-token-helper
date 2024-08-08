@@ -18,6 +18,7 @@ def large_image():
 
 def test_count_tokens_for_image(small_image, large_image):
     assert count_tokens_for_image(small_image, "low") == 85
+    assert count_tokens_for_image(small_image, "low", "gpt-4o-mini") == 2833
     assert count_tokens_for_image(small_image, "high") == 255
     assert count_tokens_for_image(small_image) == 255
     assert count_tokens_for_image(large_image, "low") == 85

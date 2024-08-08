@@ -22,6 +22,7 @@ MODELS_2_TOKEN_LIMITS = {
     "gpt-4-32k": 32000,
     "gpt-4v": 128000,
     "gpt-4o": 128000,
+    "gpt-4o-mini": 128000,
 }
 
 
@@ -106,7 +107,7 @@ def count_tokens_for_message(model: str, message: ChatCompletionMessageParam, de
                 if item["type"] == "text":
                     num_tokens += len(encoding.encode(item["text"]))
                 elif item["type"] == "image_url":
-                    num_tokens += count_tokens_for_image(item["image_url"]["url"], item["image_url"]["detail"])
+                    num_tokens += count_tokens_for_image(item["image_url"]["url"], item["image_url"]["detail"], model)
         elif isinstance(value, str):
             num_tokens += len(encoding.encode(value))
         else:
