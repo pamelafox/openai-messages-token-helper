@@ -3,6 +3,7 @@ import math
 import re
 from fractions import Fraction
 from io import BytesIO
+from typing import Optional
 
 from PIL import Image
 
@@ -17,7 +18,7 @@ def get_image_dims(image_uri: str) -> tuple[int, int]:
         raise ValueError("Image must be a base64 string.")
 
 
-def count_tokens_for_image(image_uri: str, detail: str = "auto", model: str | None = None) -> int:
+def count_tokens_for_image(image_uri: str, detail: str = "auto", model: Optional[str] = None) -> int:
     # From https://github.com/openai/openai-cookbook/pull/881/files
     # Based on https://platform.openai.com/docs/guides/vision
     multiplier = Fraction(1, 1)
