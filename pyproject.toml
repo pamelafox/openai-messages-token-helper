@@ -34,7 +34,7 @@ dev = [
     "flit",
     "azure-identity",
     "python-dotenv",
-    "mypy==1.10.0"
+    "mypy"
 ]
 
 [build-system]

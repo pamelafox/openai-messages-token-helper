@@ -126,7 +126,7 @@ def build_messages(
         if tool_calls is not None and not isinstance(tool_calls, Iterable):
             raise ValueError("tool_calls must be a list of tool calls")
         message_builder.insert_message(
-            shot["role"], shot.get("content"), tool_calls=tool_calls, tool_call_id=tool_call_id
+            shot["role"], shot.get("content"), tool_calls=tool_calls, tool_call_id=tool_call_id  # type: ignore[arg-type]
         )
 
     append_index = len(few_shots)
@@ -149,6 +149,6 @@ def build_messages(
 
         if message["role"] is None or message["content"] is None:
             raise ValueError("Few-shot messages must have both role and content")
-        message_builder.insert_message(message["role"], message["content"], index=append_index)
+        message_builder.insert_message(message["role"], message["content"], index=append_index)  # type: ignore[arg-type]
         total_token_count += potential_message_count
     return message_builder.all_messages
