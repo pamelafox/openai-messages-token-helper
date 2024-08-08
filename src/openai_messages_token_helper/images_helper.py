@@ -1,6 +1,7 @@
 import base64
 import math
 import re
+from fractions import Fraction
 from io import BytesIO
 
 from PIL import Image
@@ -16,12 +17,15 @@ def get_image_dims(image_uri: str) -> tuple[int, int]:
         raise ValueError("Image must be a base64 string.")
 
 
-def count_tokens_for_image(image_uri: str, detail: str = "auto") -> int:
+def count_tokens_for_image(image_uri: str, detail: str = "auto", model: str = None) -> int:
     # From https://github.com/openai/openai-cookbook/pull/881/files
     # Based on https://platform.openai.com/docs/guides/vision
-    LOW_DETAIL_COST = 85
-    HIGH_DETAIL_COST_PER_TILE = 170
-    ADDITIONAL_COST = 85
+    multiplier = 1
+    if model == "gpt-4o-mini":
+        multiplier = 33 + Fraction(1, 3)
+    COST_PER_TILE = 85 * multiplier
+    LOW_DETAIL_COST = COST_PER_TILE
+    HIGH_DETAIL_COST_PER_TILE = COST_PER_TILE * 2
 
     if detail == "auto":
         # assume high detail for now
@@ -29,7 +33,7 @@ def count_tokens_for_image(image_uri: str, detail: str = "auto") -> int:
 
     if detail == "low":
         # Low detail images have a fixed cost
-        return LOW_DETAIL_COST
+        return int(LOW_DETAIL_COST)
     elif detail == "high":
         # Calculate token cost for high detail images
         width, height = get_image_dims(image_uri)
@@ -47,8 +51,8 @@ def count_tokens_for_image(image_uri: str, detail: str = "auto") -> int:
         # Calculate the number of 512px squares
         num_squares = math.ceil(width / 512) * math.ceil(height / 512)
         # Calculate the total token cost
-        total_cost = num_squares * HIGH_DETAIL_COST_PER_TILE + ADDITIONAL_COST
-        return total_cost
+        total_cost = num_squares * HIGH_DETAIL_COST_PER_TILE + COST_PER_TILE
+        return math.ceil(total_cost)
     else:
         # Invalid detail_option
         raise ValueError("Invalid value for detail parameter. Use 'low' or 'high'.")

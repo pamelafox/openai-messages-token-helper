@@ -9,6 +9,7 @@ from openai.types.chat import (
 from openai_messages_token_helper import build_messages, count_tokens_for_message
 
 from .functions import search_sources_toolchoice_auto
+from .image_messages import text_and_tiny_image_message
 from .messages import (
     assistant_message_dresscode,
     assistant_message_perf,
@@ -16,7 +17,6 @@ from .messages import (
     system_message_long,
     system_message_short,
     system_message_unicode,
-    text_and_image_message,
     user_message,
     user_message_dresscode,
     user_message_perf,
@@ -35,9 +35,9 @@ def test_messagebuilder_imagemessage():
     messages = build_messages(
         "gpt-35-turbo",
         system_message_short["message"]["content"],
-        new_user_content=text_and_image_message["message"]["content"],
+        new_user_content=text_and_tiny_image_message["message"]["content"],
     )
-    assert messages == [system_message_short["message"], text_and_image_message["message"]]
+    assert messages == [system_message_short["message"], text_and_tiny_image_message["message"]]
 
 
 def test_messagebuilder_append():

@@ -4,7 +4,8 @@ from typing import Union
 import azure.identity
 import openai
 from dotenv import load_dotenv
-from messages import MESSAGE_COUNTS  # type: ignore[import-not-found]
+from image_messages import IMAGE_MESSAGE_COUNTS
+from messages import MESSAGE_COUNTS
 
 # Setup the OpenAI client to use either Azure OpenAI or OpenAI API
 load_dotenv()
@@ -38,10 +39,29 @@ else:
     MODEL_NAME = openai_model
 
 # Test the token count for each message
+
 for message_count_pair in MESSAGE_COUNTS:
+    for model, expected_tokens in [("gpt-4o", message_count_pair["count_omni"])]:
+        message = message_count_pair["message"]
+        expected_tokens = message_count_pair["count"]
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            temperature=0.7,
+            n=1,
+            messages=[message],  # type: ignore[list-item]
+        )
+
+        print(message)
+        assert response.usage is not None, "Expected usage to be present"
+        assert (
+            response.usage.prompt_tokens == expected_tokens
+        ), f"Expected {expected_tokens} tokens, got {response.usage.prompt_tokens} for model {MODEL_NAME}"
+
+
+for message_count_pair in IMAGE_MESSAGE_COUNTS:
     for model, expected_tokens in [
-        (MODEL_NAME, message_count_pair["count"]),
-        ("gpt-4o", message_count_pair["count_omni"]),
+        ("gpt-4o", message_count_pair["count"]),
+        ("gpt-4o-mini", message_count_pair["count_4o_mini"]),
     ]:
         response = client.chat.completions.create(
             model=model,
@@ -50,7 +70,6 @@ for message_count_pair in MESSAGE_COUNTS:
             messages=[message_count_pair["message"]],  # type: ignore[list-item]
         )
 
-        print(message_count_pair["message"])
         assert response.usage is not None, "Expected usage to be present"
         assert (
             response.usage.prompt_tokens == expected_tokens
