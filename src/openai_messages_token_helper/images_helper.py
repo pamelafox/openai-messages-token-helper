@@ -17,12 +17,12 @@ def get_image_dims(image_uri: str) -> tuple[int, int]:
         raise ValueError("Image must be a base64 string.")
 
 
-def count_tokens_for_image(image_uri: str, detail: str = "auto", model: str = None) -> int:
+def count_tokens_for_image(image_uri: str, detail: str = "auto", model: str | None = None) -> int:
     # From https://github.com/openai/openai-cookbook/pull/881/files
     # Based on https://platform.openai.com/docs/guides/vision
-    multiplier = 1
+    multiplier = Fraction(1, 1)
     if model == "gpt-4o-mini":
-        multiplier = 33 + Fraction(1, 3)
+        multiplier = Fraction(100, 3)
     COST_PER_TILE = 85 * multiplier
     LOW_DETAIL_COST = COST_PER_TILE
     HIGH_DETAIL_COST_PER_TILE = COST_PER_TILE * 2

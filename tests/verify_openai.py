@@ -4,8 +4,8 @@ from typing import Union
 import azure.identity
 import openai
 from dotenv import load_dotenv
-from image_messages import IMAGE_MESSAGE_COUNTS
-from messages import MESSAGE_COUNTS
+from image_messages import IMAGE_MESSAGE_COUNTS  # type: ignore[import-not-found]
+from messages import MESSAGE_COUNTS  # type: ignore[import-not-found]
 
 # Setup the OpenAI client to use either Azure OpenAI or OpenAI API
 load_dotenv()
