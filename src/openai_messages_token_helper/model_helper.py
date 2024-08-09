@@ -23,6 +23,14 @@ MODELS_2_TOKEN_LIMITS = {
     "gpt-4v": 128000,
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
+    # OpenAI specific model names:
+    # https://platform.openai.com/docs/models/gpt-4-turbo-and-gpt-4
+    "gpt-4-0613": 8192,
+    "gpt-4-turbo": 128000,
+    "gpt-4-turbo-2024-04-09": 128000,
+    "gpt-4-turbo-preview": 128000,
+    "gpt-4-0125-preview": 128000,
+    "gpt-4-1106-preview": 128000,
 }
 
 
