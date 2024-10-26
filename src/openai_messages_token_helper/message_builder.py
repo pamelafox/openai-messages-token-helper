@@ -147,8 +147,12 @@ def build_messages(
             logging.info("Reached max tokens of %d, history will be truncated", max_tokens)
             break
 
-        if message["role"] is None or message["content"] is None:
-            raise ValueError("Few-shot messages must have both role and content")
-        message_builder.insert_message(message["role"], message["content"], index=append_index)  # type: ignore[arg-type]
+        if message["role"] is None or (message["content"] is None and message.get("role") != "assistant"):
+            raise ValueError("Past messages must have both role and content, unless it is a tools message from assistant.")
+
+        message_builder.insert_message(message["role"], message["content"], 
+                                       tool_calls=message.get("tool_calls",None), 
+                                       tool_call_id=message.get("tool_call_id",None),
+                                       index=append_index)  # type: ignore[arg-type]
         total_token_count += potential_message_count
     return message_builder.all_messages
