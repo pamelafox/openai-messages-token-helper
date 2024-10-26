@@ -91,7 +91,7 @@ def count_tokens_for_message(model: str, message: ChatCompletionMessageParam, de
 
     Args:
         model (str): The name of the model to use for encoding.
-        message (Mapping): The message to encode, in a dictionary-like object.
+        message (dict): The message to encode, in a dictionary-like object.
         default_to_cl100k (bool): Whether to default to the CL100k encoding if the model is not found.
     Returns:
         int: The total number of tokens required to encode the message.
