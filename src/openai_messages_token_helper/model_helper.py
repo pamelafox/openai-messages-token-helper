@@ -91,7 +91,7 @@ def count_tokens_for_message(model: str, message: ChatCompletionMessageParam, de
 
     Args:
         model (str): The name of the model to use for encoding.
-        message (Mapping): The message to encode, in a dictionary-like object.
+        message (dict): The message to encode, in a dictionary-like object.
         default_to_cl100k (bool): Whether to default to the CL100k encoding if the model is not found.
     Returns:
         int: The total number of tokens required to encode the message.
@@ -116,8 +116,14 @@ def count_tokens_for_message(model: str, message: ChatCompletionMessageParam, de
                     num_tokens += len(encoding.encode(item["text"]))
                 elif item["type"] == "image_url":
                     num_tokens += count_tokens_for_image(item["image_url"]["url"], item["image_url"]["detail"], model)
+                elif item["type"] == "function":
+                    num_tokens += 1     #   A guess, to be revised. What is the impact of a tool/function call on tokens?
         elif isinstance(value, str):
             num_tokens += len(encoding.encode(value))
+        elif (key in ["content", "refusal", "function_call"] and value is None 
+            and message.get("role")=="assistant" 
+            and message.get("tool_calls") is not None):     # If the model calls a tool/function then content can be None
+            num_tokens += 0     #   a guess at this stage, to be revised
         else:
             raise ValueError(f"Could not encode unsupported message value type: {type(value)}")
         if key == "name":
