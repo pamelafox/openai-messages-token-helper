@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.11] - Jan 10, 2025
+
+- When no "detail" is provided for an "image_url" message part, "auto" is now assumed.
+
 ## [0.1.10] - Aug 7, 2024
 
 - Add additional OpenAI.com model names to the `get_token_limit` function.

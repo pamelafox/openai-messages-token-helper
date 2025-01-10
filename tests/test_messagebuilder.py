@@ -6,6 +6,7 @@ from openai.types.chat import (
     ChatCompletionToolChoiceOptionParam,
     ChatCompletionToolParam,
 )
+
 from openai_messages_token_helper import build_messages, count_tokens_for_message
 
 from .functions import search_sources_toolchoice_auto

@@ -16,6 +16,23 @@ text_and_tiny_image_message = {
     "count_4o_mini": 8511,
 }
 
+text_and_tiny_image_message_nodetail = {
+    "message": {
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Describe this picture:"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg=="
+                },
+            },
+        ],
+    },
+    "count": 266,
+    "count_4o_mini": 8511,
+}
+
 text_and_tiny_image_message_low = {
     "message": {
         "role": "user",
@@ -52,4 +69,9 @@ text_and_large_image_message = {
     "count_4o_mini": 19842,
 }
 
-IMAGE_MESSAGE_COUNTS = [text_and_tiny_image_message, text_and_tiny_image_message_low, text_and_large_image_message]
+IMAGE_MESSAGE_COUNTS = [
+    text_and_tiny_image_message,
+    text_and_tiny_image_message_nodetail,
+    text_and_tiny_image_message_low,
+    text_and_large_image_message,
+]
