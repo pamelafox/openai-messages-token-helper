@@ -1,6 +1,7 @@
 import base64
 
 import pytest
+
 from openai_messages_token_helper import count_tokens_for_image
 
 
