@@ -26,7 +26,7 @@ def normalize_content(content: Union[str, Iterable[ChatCompletionContentPartPara
         return unicodedata.normalize("NFC", content)
     else:
         for part in content:
-            if "image_url" not in part:
+            if "image_url" not in part and "text" in part:
                 part["text"] = unicodedata.normalize("NFC", part["text"])
         return content
 
