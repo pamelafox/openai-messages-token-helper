@@ -130,26 +130,13 @@ def test_count_tokens_for_system_and_tools_fallback(caplog):
         assert "Model llama-3.1 not found, defaulting to CL100k encoding" in caplog.text
 
 
-def test_count_tokens_for_message_reasoning_model_warning(caplog):
+@pytest.mark.parametrize("model", ["gpt-5", "gpt-5-mini", "gpt-5-nano"])
+def test_count_tokens_for_message_reasoning_model_warning(caplog, model):
     """Test that reasoning models log warnings when counting tokens."""
     with caplog.at_level("WARNING"):
-        count_tokens_for_message("gpt-5", user_message["message"], default_to_cl100k=True)
+        count_tokens_for_message(model, user_message["message"], default_to_cl100k=True)
         assert (
-            "Model gpt-5 is a reasoning model. Token usage estimates may not reflect actual costs due to reasoning tokens."
-            in caplog.text
-        )
-
-    with caplog.at_level("WARNING"):
-        count_tokens_for_message("gpt-5-mini", user_message["message"], default_to_cl100k=True)
-        assert (
-            "Model gpt-5-mini is a reasoning model. Token usage estimates may not reflect actual costs due to reasoning tokens."
-            in caplog.text
-        )
-
-    with caplog.at_level("WARNING"):
-        count_tokens_for_message("gpt-5-nano", user_message["message"], default_to_cl100k=True)
-        assert (
-            "Model gpt-5-nano is a reasoning model. Token usage estimates may not reflect actual costs due to reasoning tokens."
+            f"Model {model} is a reasoning model. Token usage estimates may not reflect actual costs due to reasoning tokens."
             in caplog.text
         )
 
