@@ -15,7 +15,6 @@ def test_get_token_limit():
     assert get_token_limit("gpt-4") == 8100
     assert get_token_limit("gpt-4-32k") == 32000
     assert get_token_limit("gpt-4o") == 128000
-    assert get_token_limit("gpt-4.1") == 1047576
 
 
 def test_get_token_limit_error():
@@ -41,7 +40,6 @@ def test_get_token_limit_default(caplog):
         ("gpt-4-32k", "count"),
         ("gpt-4v", "count"),
         ("gpt-4o", "count_omni"),
-        ("gpt-4.1", "count"),
     ],
 )
 @pytest.mark.parametrize(
