@@ -31,10 +31,18 @@ MODELS_2_TOKEN_LIMITS = {
     "gpt-4-turbo-preview": 128000,
     "gpt-4-0125-preview": 128000,
     "gpt-4-1106-preview": 128000,
+    # GPT-5 models:
+    "gpt-5": 272000,
+    "gpt-5-mini": 272000,
+    "gpt-5-nano": 272000,
+    "gpt-5-chat": 128000,
 }
 
 
 AOAI_2_OAI = {"gpt-35-turbo": "gpt-3.5-turbo", "gpt-35-turbo-16k": "gpt-3.5-turbo-16k", "gpt-4v": "gpt-4-turbo-vision"}
+
+# Set of reasoning models that cannot have token usage pre-estimated
+REASONING_MODELS = {"gpt-5", "gpt-5-mini", "gpt-5-nano"}
 
 logger = logging.getLogger("openai_messages_token_helper")
 
@@ -101,6 +109,13 @@ def count_tokens_for_message(model: str, message: ChatCompletionMessageParam, de
     >> count_tokens_for_message(model, message)
     13
     """
+    # Warn if using a reasoning model
+    if model in REASONING_MODELS:
+        logger.warning(
+            "Model %s is a reasoning model. Token usage estimates may not reflect actual costs due to reasoning tokens.",
+            model,
+        )
+
     encoding = encoding_for_model(model, default_to_cl100k)
 
     # Assumes we're using a recent model
