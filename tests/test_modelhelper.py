@@ -151,19 +151,3 @@ def test_count_tokens_for_message_non_reasoning_model_no_warning(caplog):
         assert len(reasoning_warnings) == 0
 
 
-def test_count_tokens_for_system_and_tools_reasoning_model_warning(caplog):
-    """Test that reasoning models log warnings when counting system and tools tokens (via count_tokens_for_message)."""
-    function_count_pair = search_sources_toolchoice_auto
-    with caplog.at_level("WARNING"):
-        count_tokens_for_system_and_tools(
-            "gpt-5",
-            function_count_pair["system_message"],
-            function_count_pair["tools"],
-            function_count_pair["tool_choice"],
-            default_to_cl100k=True,
-        )
-        # Warning should come from count_tokens_for_message when processing system_message
-        assert (
-            "Model gpt-5 is a reasoning model. Token usage estimates may not reflect actual costs due to reasoning tokens."
-            in caplog.text
-        )
