@@ -77,7 +77,7 @@ jobs:
         run: |
           set -euo pipefail
           prompt=$(cat <<'EOF'
-          You are a helpful reviewer. Assess whether the PR description is complete, clear, and includes a test plan. If missing, suggest concrete improvements.
+          You are a helpful reviewer. Assess whether the PR description is complete, clear, and includes a test plan. If missing, suggest concrete improvements. Do not be overly critical, however - only provide feedback about sections that are clearly lacking or confusing.
           EOF
           )
           review_out=$(llm prompt -m github/gpt-4o-mini --system "$prompt" "$PR_BODY")
