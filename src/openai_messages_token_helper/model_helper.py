@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 import tiktoken
 from openai.types.chat import (
@@ -167,6 +168,11 @@ def count_tokens_for_system_and_tools(
     if tool_choice == "none":
         tokens += 1
     elif isinstance(tool_choice, dict):
-        tokens += 7
-        tokens += len(encoding.encode(tool_choice["function"]["name"]))
+        # Convert to a plain dict so mypy treats it as a regular mapping
+        tc: dict[str, Any] = dict(tool_choice)
+        fn = tc.get("function")
+        fn_name = fn.get("name") if isinstance(fn, dict) else None
+        if isinstance(fn_name, str):
+            tokens += 7
+            tokens += len(encoding.encode(fn_name))
     return tokens
