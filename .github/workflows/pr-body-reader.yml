@@ -77,7 +77,7 @@ jobs:
         run: |
           set -euo pipefail
           prompt=$(cat <<'EOF'
-          Assess whether the PR has a description and test plan section. If a section is missing or unclear, suggest concrete improvements. Do not be overly critical, however - only provide feedback about sections that are way too short or confusing.
+          Assess whether the PR includes a description and test plan section. Only provide feedback about sections that are way too short or confusing. IF you do have suggested edits, offer a full rewrite of the section that can be pasted.
           EOF
           )
           review_out=$(llm prompt -m github/gpt-5-mini --system "$prompt" "$PR_BODY")
