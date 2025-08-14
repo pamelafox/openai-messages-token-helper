@@ -1,0 +1,105 @@
+name: PR Body Reader
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+permissions:
+  pull-requests: write
+  issues: write
+  models: read
+
+jobs:
+  read-pr-body:
+    name: Read PR body
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print PR metadata and body
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "PR #$PR_NUMBER: $PR_TITLE"
+          echo "URL: $PR_URL"
+          echo "Body:"
+          echo "-----"
+          printf '%s\n' "$PR_BODY"
+
+      - name: Check for empty PR description
+        id: bodycheck
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Trim whitespace and detect emptiness
+          trimmed=$(printf '%s' "$PR_BODY" | awk '{$1=$1};1')
+          if [ -z "$trimmed" ]; then
+            echo "needs_description=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_description=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ask for PR description
+        if: steps.bodycheck.outputs.needs_description == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const number = context.payload.pull_request.number;
+            const body = `👋 Thanks for the PR! Please add a description with context and a brief test plan so reviewers can understand the change.`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: number,
+              body,
+            });
+
+      - name: Setup Python
+        if: steps.bodycheck.outputs.needs_description == 'false'
+        id: installpython
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install LLM with GitHub Models
+        if: steps.bodycheck.outputs.needs_description == 'false'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install llm llm-github-models
+
+      - name: Generate LLM review
+        if: steps.bodycheck.outputs.needs_description == 'false'
+        id: review
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          prompt=$(cat <<'EOF'
+          Assess whether the PR includes a description and test plan section. Only provide feedback about sections that are way too short or confusing. IF you do have suggested edits, offer a full rewrite of the section that can be pasted.
+          EOF
+          )
+          review_out=$(llm prompt -m github/gpt-5-mini --system "$prompt" "$PR_BODY")
+          {
+            echo 'text<<REVIEW'
+            printf '%s\n' "$review_out"
+            echo 'REVIEW'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment review on PR
+        if: steps.bodycheck.outputs.needs_description == 'false'
+        uses: actions/github-script@v7
+        env:
+          REVIEW: ${{ steps.review.outputs.text }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const number = context.payload.pull_request.number;
+            const body = `🤖 Automated PR Review\n\n${process.env.REVIEW}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: number,
+              body,
+            });
