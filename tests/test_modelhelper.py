@@ -15,6 +15,11 @@ def test_get_token_limit():
     assert get_token_limit("gpt-4") == 8100
     assert get_token_limit("gpt-4-32k") == 32000
     assert get_token_limit("gpt-4o") == 128000
+    # GPT-5 models
+    assert get_token_limit("gpt-5") == 272000
+    assert get_token_limit("gpt-5-mini") == 272000
+    assert get_token_limit("gpt-5-nano") == 272000
+    assert get_token_limit("gpt-5-chat") == 128000
 
 
 def test_get_token_limit_error():
@@ -123,3 +128,24 @@ def test_count_tokens_for_system_and_tools_fallback(caplog):
         )
         assert counted_tokens == function_count_pair["count"]
         assert "Model llama-3.1 not found, defaulting to CL100k encoding" in caplog.text
+
+
+@pytest.mark.parametrize("model", ["gpt-5", "gpt-5-mini", "gpt-5-nano"])
+def test_count_tokens_for_message_reasoning_model_warning(caplog, model):
+    """Test that reasoning models log warnings when counting tokens."""
+    with caplog.at_level("WARNING"):
+        count_tokens_for_message(model, user_message["message"], default_to_cl100k=True)
+        assert (
+            f"Model {model} is a reasoning model. Token usage estimates may not reflect actual costs due to reasoning tokens."
+            in caplog.text
+        )
+
+
+def test_count_tokens_for_message_non_reasoning_model_no_warning(caplog):
+    """Test that non-reasoning models (like gpt-5-chat) do not log warnings."""
+    with caplog.at_level("WARNING"):
+        count_tokens_for_message("gpt-5-chat", user_message["message"], default_to_cl100k=True)
+        # Should only have encoding warning, not reasoning model warning
+        warning_messages = [record.message for record in caplog.records if record.levelname == "WARNING"]
+        reasoning_warnings = [msg for msg in warning_messages if "reasoning model" in msg]
+        assert len(reasoning_warnings) == 0
