@@ -57,41 +57,6 @@ pre-commit run --all-files
 
 **CRITICAL**: Always test at least one complete functional scenario after making changes:
 
-### Basic Token Counting Validation
-Test the core functionality by running a simple token counting example:
-
-```python
-# Basic validation script - save as /tmp/test_functionality.py
-import sys
-sys.path.insert(0, 'src')
-
-try:
-    from openai_messages_token_helper import build_messages, count_tokens_for_message
-    
-    # Test basic message building
-    messages = build_messages(
-        model="gpt-3.5-turbo",
-        system_prompt="You are a helpful assistant.",
-        new_user_content="Hello, world!",
-        max_tokens=100
-    )
-    
-    print(f"✓ build_messages works: {len(messages)} messages created")
-    
-    # Test token counting  
-    if messages:
-        token_count = count_tokens_for_message("gpt-3.5-turbo", messages[0])
-        print(f"✓ count_tokens_for_message works: {token_count} tokens")
-    
-    print("✓ Core functionality validated successfully")
-    
-except Exception as e:
-    print(f"✗ Validation failed: {e}")
-    print("Note: Likely due to missing dependencies (openai, tiktoken)")
-```
-
-Always run this validation after code changes: `python3 /tmp/test_functionality.py`
-
 ### CI Compliance Validation
 Always run all CI checks before completing work:
 
@@ -146,9 +111,6 @@ python3 -m mypy .
 
 # Testing (NEVER CANCEL - set 5+ minute timeout)
 python3 -m pytest -s -vv --cov --cov-fail-under=97
-
-# Functional validation
-python3 /tmp/test_functionality.py
 ```
 
 ## Common Issues and Workarounds
@@ -175,6 +137,6 @@ python3 /tmp/test_functionality.py
 
 - **NEVER CANCEL** commands that appear to hang - testing and dependency installation can take several minutes
 - **ALWAYS** set appropriate timeouts: 5+ minutes for tests, 2+ minutes for linting
-- **ALWAYS** validate functionality after changes using the validation script
+- **ALWAYS** validate functionality after changes using pytest tests
 - **ALWAYS** run all CI checks before submitting: ruff, black, mypy, pytest
 - **EXPECT** potential PyPI connectivity issues and plan accordingly
