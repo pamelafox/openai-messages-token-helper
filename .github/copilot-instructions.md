@@ -18,7 +18,6 @@ pre-commit install
 
 **KNOWN ISSUE**: `python3 -m pip install` frequently fails due to PyPI connectivity timeouts. If you encounter ReadTimeoutError or connection timeouts:
 - Try increasing pip timeout: `pip3 install --timeout 600 -e '.[dev]'`
-- Document the limitation and continue with available tools
 - Some system packages may be available: `sudo apt install python3-pil` for Pillow
 
 ### Testing and Validation
@@ -156,12 +155,12 @@ python3 /tmp/test_functionality.py
 
 ### Network Connectivity Issues
 - **Problem**: PyPI timeouts during `pip install`
-- **Workaround**: Document the limitation, use system packages where available
+- **Workaround**: Use system packages where available
 - **Command**: `sudo apt install python3-pil` for Pillow dependency
 
 ### Dependency Import Errors
 - **Problem**: Missing `openai`, `tiktoken`, or `pillow` packages
-- **Solution**: Ensure dependencies are installed; if not possible due to network issues, document the limitation
+- **Solution**: Ensure dependencies are installed; if not possible due to network issues, continue with available tools
 - **Validation**: Basic imports will fail but code structure analysis can continue
 
 ### CI/GitHub Actions Timing
@@ -178,5 +177,4 @@ python3 /tmp/test_functionality.py
 - **ALWAYS** set appropriate timeouts: 5+ minutes for tests, 2+ minutes for linting
 - **ALWAYS** validate functionality after changes using the validation script
 - **ALWAYS** run all CI checks before submitting: ruff, black, mypy, pytest
-- **DOCUMENT** any network connectivity issues rather than failing silently
 - **EXPECT** potential PyPI connectivity issues and plan accordingly
