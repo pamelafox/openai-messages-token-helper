@@ -2,8 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.1.12] - August 14, 2025
 
+- Add gpt-5 family support (with warning about reasoning tokens not counted).
 - Add gpt-4.1 model support with context window of 1,047,576 tokens.
 
 ## [0.1.11] - Jan 10, 2025
