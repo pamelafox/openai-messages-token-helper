@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- Add gpt-4.1 model support with context window of 1,047,576 tokens.
+
 ## [0.1.11] - Jan 10, 2025
 
 - When no "detail" is provided for an "image_url" message part, "auto" is now assumed.
