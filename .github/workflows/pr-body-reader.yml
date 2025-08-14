@@ -1,0 +1,71 @@
+name: PR Body Reader
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+permissions:
+  pull-requests: write
+  issues: write
+  models: read
+
+jobs:
+  read-pr-body:
+    name: Read PR body
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print PR metadata and body
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "PR #$PR_NUMBER: $PR_TITLE"
+          echo "URL: $PR_URL"
+          echo "Body:"
+          echo "-----"
+          printf '%s\n' "$PR_BODY"
+      - name: Setup Python
+        id: installpython
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install LLM with GitHub Models
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install llm llm-github-models
+      - name: Generate LLM review
+        id: review
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          prompt=$(cat <<'EOF'
+          You are a helpful reviewer. Assess whether the PR description is complete, clear, and includes a test plan. If missing, suggest concrete improvements.
+          EOF
+          )
+          # Run the model; capture multiline output safely
+          review_out=$(llm prompt -m github/gpt-4o-mini --system "$prompt" "$PR_BODY")
+          # Save to GITHUB_OUTPUT, preserving newlines
+          {
+            echo 'text<<REVIEW'
+            printf '%s\n' "$review_out"
+            echo 'REVIEW'
+          } >> "$GITHUB_OUTPUT"
+      - name: Comment review on PR
+        uses: actions/github-script@v7
+        env:
+          REVIEW: ${{ steps.review.outputs.text }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const number = context.payload.pull_request.number;
+            const body = `🤖 Automated PR Review\n\n${process.env.REVIEW}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: number,
+              body,
+            });
