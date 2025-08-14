@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 import tiktoken
 from openai.types.chat import (
@@ -23,6 +24,9 @@ MODELS_2_TOKEN_LIMITS = {
     "gpt-4v": 128000,
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
+    "gpt-4.1": 1047576,
+    "gpt-4.1-mini": 1047576,
+    "gpt-4.1-nano": 1047576,
     # OpenAI specific model names:
     # https://platform.openai.com/docs/models/gpt-4-turbo-and-gpt-4
     "gpt-4-0613": 8192,
@@ -166,6 +170,11 @@ def count_tokens_for_system_and_tools(
     if tool_choice == "none":
         tokens += 1
     elif isinstance(tool_choice, dict):
-        tokens += 7
-        tokens += len(encoding.encode(tool_choice["function"]["name"]))
+        # Convert to a plain dict so mypy treats it as a regular mapping
+        tc: dict[str, Any] = dict(tool_choice)
+        fn = tc.get("function")
+        fn_name = fn.get("name") if isinstance(fn, dict) else None
+        if isinstance(fn_name, str):
+            tokens += 7
+            tokens += len(encoding.encode(fn_name))
     return tokens
