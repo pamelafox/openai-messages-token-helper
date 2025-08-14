@@ -149,5 +149,3 @@ def test_count_tokens_for_message_non_reasoning_model_no_warning(caplog):
         warning_messages = [record.message for record in caplog.records if record.levelname == "WARNING"]
         reasoning_warnings = [msg for msg in warning_messages if "reasoning model" in msg]
         assert len(reasoning_warnings) == 0
-
-
