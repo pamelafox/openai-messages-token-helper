@@ -40,13 +40,17 @@ MODELS_2_TOKEN_LIMITS = {
     "gpt-5-mini": 272000,
     "gpt-5-nano": 272000,
     "gpt-5-chat": 128000,
+    "gpt-5.1": 272000,
+    "gpt-5.1-chat": 111616,
+    "gpt-5.2": 272000,
+    "gpt-5.2-chat": 111616,
 }
 
 
 AOAI_2_OAI = {"gpt-35-turbo": "gpt-3.5-turbo", "gpt-35-turbo-16k": "gpt-3.5-turbo-16k", "gpt-4v": "gpt-4-turbo-vision"}
 
 # Set of reasoning models that cannot have token usage pre-estimated
-REASONING_MODELS = {"gpt-5", "gpt-5-mini", "gpt-5-nano"}
+REASONING_MODELS = {"gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-5.1", "gpt-5.1-chat", "gpt-5.2"}
 
 logger = logging.getLogger("openai_messages_token_helper")
 

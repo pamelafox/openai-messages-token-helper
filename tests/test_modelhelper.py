@@ -20,6 +20,10 @@ def test_get_token_limit():
     assert get_token_limit("gpt-5-mini") == 272000
     assert get_token_limit("gpt-5-nano") == 272000
     assert get_token_limit("gpt-5-chat") == 128000
+    assert get_token_limit("gpt-5.1") == 272000
+    assert get_token_limit("gpt-5.1-chat") == 111616
+    assert get_token_limit("gpt-5.2") == 272000
+    assert get_token_limit("gpt-5.2-chat") == 111616
 
 
 def test_get_token_limit_error():
