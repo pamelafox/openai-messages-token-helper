@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.13] - December 29, 2025
+
+- Add gpt-5.1, gpt-5.2 support
+
 ## [0.1.12] - August 14, 2025
 
 - Add gpt-5 family support (with warning about reasoning tokens not counted).
