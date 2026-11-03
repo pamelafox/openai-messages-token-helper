@@ -1,7 +1,6 @@
 import logging
 import unicodedata
 from collections.abc import Iterable
-from typing import Optional, Union
 
 from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
@@ -19,7 +18,7 @@ from openai.types.chat import (
 from .model_helper import count_tokens_for_message, count_tokens_for_system_and_tools, get_token_limit
 
 
-def normalize_content(content: Union[str, Iterable[ChatCompletionContentPartParam], None]):
+def normalize_content(content: str | Iterable[ChatCompletionContentPartParam] | None):
     if content is None:
         return None
     if isinstance(content, str):
@@ -54,10 +53,10 @@ class _MessageBuilder:
     def insert_message(
         self,
         role: ChatCompletionRole,
-        content: Union[str, Iterable[ChatCompletionContentPartParam], None],
+        content: str | Iterable[ChatCompletionContentPartParam] | None,
         index: int = 0,
-        tool_calls: Optional[Iterable[ChatCompletionMessageToolCallParam]] = None,
-        tool_call_id: Optional[str] = None,
+        tool_calls: Iterable[ChatCompletionMessageToolCallParam] | None = None,
+        tool_call_id: str | None = None,
     ):
         """
         Inserts a message into the conversation at the specified index,
@@ -87,12 +86,12 @@ def build_messages(
     model: str,
     system_prompt: str,
     *,
-    tools: Optional[list[ChatCompletionToolParam]] = None,
-    tool_choice: Optional[ChatCompletionToolChoiceOptionParam] = None,
-    new_user_content: Union[str, list[ChatCompletionContentPartParam], None] = None,  # list is for GPT4v usage
+    tools: list[ChatCompletionToolParam] | None = None,
+    tool_choice: ChatCompletionToolChoiceOptionParam | None = None,
+    new_user_content: str | list[ChatCompletionContentPartParam] | None = None,  # list is for GPT4v usage
     past_messages: list[ChatCompletionMessageParam] = [],  # *not* including system prompt
     few_shots: list[ChatCompletionMessageParam] = [],  # will always be inserted after system prompt
-    max_tokens: Optional[int] = None,
+    max_tokens: int | None = None,
     fallback_to_default: bool = False,
 ) -> list[ChatCompletionMessageParam]:
     """

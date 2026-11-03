@@ -3,7 +3,7 @@ name = "openai-messages-token-helper"
 description = "A helper library for estimating tokens used by messages sent through OpenAI Chat Completions API."
 version = "0.1.13"
 authors = [{name = "Pamela Fox"}]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
@@ -15,8 +15,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Framework :: Pytest"
     ]
@@ -43,7 +41,7 @@ build-backend = "flit_core.buildapi"
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py311"
 output-format = "full"
 
 [tool.ruff.lint]
@@ -52,7 +50,7 @@ ignore = ["D203", "E501"]
 
 [tool.black]
 line-length = 120
-target-version = ["py39"]
+target-version = ["py311"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --cov"
