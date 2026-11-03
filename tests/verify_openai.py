@@ -1,5 +1,4 @@
 import os
-from typing import Union
 
 import azure.identity
 import openai
@@ -11,7 +10,7 @@ from messages import MESSAGE_COUNTS  # type: ignore[import-not-found]
 load_dotenv()
 API_HOST = os.getenv("API_HOST")
 
-client: Union[openai.OpenAI, openai.AzureOpenAI]
+client: openai.OpenAI | openai.AzureOpenAI
 
 if API_HOST == "azure":
     if (azure_openai_version := os.getenv("AZURE_OPENAI_VERSION")) is None:
